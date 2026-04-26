@@ -73,6 +73,16 @@ See [`docs/architecture.md`](docs/architecture.md) for the full diagram.
 
 ## Quick start
 
+### Prerequisites
+
+- Python 3.10+
+- Docker (either Docker Desktop or [Colima](https://github.com/abiosoft/colima) with `docker` CLI). For Colima, start with:
+  ```bash
+  colima start --cpu 4 --memory 8 --disk 60
+  ```
+
+### Setup
+
 ```bash
 # Install Python deps (editable install of all packages)
 pip install -e ".[dev]"
@@ -80,9 +90,20 @@ pip install -e ".[dev]"
 # Install pre-commit hooks
 pre-commit install
 
-# Boot the full stack (Phase 1+ only)
-docker compose up -d
+# Boot the full stack
+make up          # docker compose up -d --build
+make ps          # verify everything healthy
+make logs        # tail logs
+make down        # teardown
 ```
+
+Once up, visit:
+- Frontend: http://localhost:3000
+- API docs (Swagger): http://localhost:8000/docs
+- MLflow: http://localhost:5000
+- Airflow: http://localhost:8080 (admin/admin)
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3001 (admin/admin)
 
 ## License
 
