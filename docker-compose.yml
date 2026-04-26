@@ -1,0 +1,34 @@
+# Phase 0: placeholder only. Phase 1 fills in real service definitions.
+# Current state: validates YAML structure and defines the service names
+# we'll wire up next.
+
+version: "3.9"
+
+name: stock-sentiment-mlops
+
+networks:
+  ssa-net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  mlflow-artifacts:
+  dvc-remote:
+  prometheus-data:
+  grafana-data:
+
+services:
+  # Filled in Phase 1:
+  # frontend:
+  # api:
+  # model-server:
+  # mlflow:
+  # airflow-webserver:
+  # airflow-scheduler:
+  # postgres:
+  # prometheus:
+  # grafana:
+  placeholder:
+    image: hello-world
+    networks:
+      - ssa-net

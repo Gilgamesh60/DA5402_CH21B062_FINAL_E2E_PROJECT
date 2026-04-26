@@ -1,0 +1,67 @@
+# Central configuration consumed by DVC stages, Airflow DAGs, and training.
+# Anything hyperparameter-like lives here so DVC can cache on changes.
+
+ingestion:
+  news:
+    sources: [newsapi, finnhub]
+    lookback_hours: 24
+    languages: [en]
+    max_items_per_source: 500
+  social:
+    sources: [reddit]
+    subreddits: [wallstreetbets, stocks, investing]
+    lookback_hours: 24
+    max_posts: 1000
+  tickers:
+    # Seed list for the initial pipeline; expand as needed
+    - AAPL
+    - MSFT
+    - GOOGL
+    - AMZN
+    - TSLA
+    - NVDA
+    - META
+
+validation:
+  required_fields: [id, ticker, text, timestamp, source]
+  min_text_length: 10
+  max_text_length: 5000
+  dedupe_on: [id, source]
+
+features:
+  text_cleaning:
+    lowercase: true
+    remove_urls: true
+    remove_tickers: false
+  aggregation_window_minutes: 60
+  vectorizer:
+    type: tfidf
+    max_features: 20000
+    ngram_range: [1, 2]
+
+training:
+  model_type: logistic_regression  # baseline; swap to finbert in Phase 10
+  test_size: 0.2
+  val_size: 0.1
+  random_seed: 42
+  class_weight: balanced
+  hyperparameters:
+    C: 1.0
+    max_iter: 1000
+
+evaluation:
+  primary_metric: macro_f1
+  acceptance_threshold: 0.75
+
+registry:
+  model_name: stock-sentiment
+  promote_on_improvement: true
+  staging_threshold_delta: 0.01
+
+monitoring:
+  drift:
+    method: ks_test
+    p_value_threshold: 0.05
+  alerts:
+    error_rate_threshold: 0.05
+    latency_p95_ms: 200
