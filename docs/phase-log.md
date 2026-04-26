@@ -98,7 +98,34 @@ Problems faced:
 - Wiped and recreated the `mlflow` Postgres database after the fix because existing experiments had the bad `artifact_location` baked in.
 - Client (venv) was MLflow 3.11.1 while server was still 2.10.2 — client called endpoints the server didn't have. Pinned the server Dockerfile to `mlflow==3.11.1` to match.
 - MLflow 3.x emits `FutureWarning` for `transition_model_version_stage` in favour of aliases, but the evaluation rubric explicitly expects stage-based promotion. Left the warnings in place; migration to aliases is a Phase-post-grading concern.
-## Phase 5 — FastAPI gateway + model server — ⏳ pending
+## Phase 5 — FastAPI gateway + real MLflow model server — ✅ complete
+
+Delivered:
+- `src/ssa_api/schemas.py` — Pydantic request/response models matching the LLD contract exactly
+- `src/ssa_api/main.py` — 10 endpoints implementing the full LLD: `/health`, `/ready`, `/metrics`, `/model/info`, `/model/versions`, `/model/rollback`, `/predict`, `/batch_predict`, `/feedback`, plus `/` landing page
+- `src/ssa_api/middleware.py` — request-id + metrics + structured logging middleware
+- `src/ssa_api/inference.py` — per-record prediction + aggregation (averaged probs, argmax for ticker-level sentiment)
+- `src/ssa_api/model_client.py` — HTTP client for the model-server's `/invocations`
+- `src/ssa_api/repo.py` — Postgres feedback writer + parquet-backed record lookup
+- `src/ssa_model/pyfunc_wrapper.py` — MLflow pyfunc bundling (vectorizer + classifier) so the model-server accepts raw text
+- `docker/model-server/Dockerfile` — swapped from Phase 1 stub to real `mlflow models serve -m models:/stock-sentiment/Production`
+- `docker/api/Dockerfile` — runtime deps including psycopg2, mlflow-skinny, pandas, pyarrow
+- `docker-compose.yml` — `./data` bind-mount on api, tighter healthchecks, MLflow allowed-hosts updated for compose network
+- 6 new unit tests for the inference aggregation + API validation; full suite: 43 tests passing
+
+Live verification (Colima):
+- `/predict AAPL` → returns ticker-level sentiment with per-class scores, sample size, model metadata, request id, latency ≈ 480ms on first call (cached afterwards)
+- `/batch_predict [AAPL, MSFT, NVDA]` → 3 results in ~350ms total
+- `/feedback` → row visible in Postgres `feedback` table
+- `/model/info` → surfaces git SHA + MLflow run id for reproducibility
+- `/metrics` → emits `predictions_total{sentiment=...}`, `model_version_info`, `feedback_received_total`
+- `mlflow models serve` loads pyfunc v1 from registry, responds to `/invocations`
+
+Problems faced:
+- MLflow 3.x `--allowed-hosts` defense rejected container-name Host headers (`mlflow:5000` from model-server). Fixed by expanding allowed-hosts in the Dockerfile to include the service name plus Docker's default bridge subnets.
+- sklearn version mismatch between training (1.8.0 in venv) and serving (1.7.2 initially in model-server image). The unpickled LogisticRegression referenced attributes only in 1.8. Aligned by pinning `scikit-learn==1.8.0` in the model-server image.
+- MLflow pyfunc scoring server passes rows as numpy scalars/arrays, not Python strings. Rewrote `SentimentPipeline._coerce_to_texts` to handle DataFrames, numpy scalars, single-element arrays, and dict-wrapped inputs uniformly.
+- Switched model registration from `mlflow.sklearn.log_model` to a `pyfunc` bundle so the model-server accepts text instead of sparse matrices — cleaner HTTP contract and matches the rubric's "MLflow API-ification" item.
 ## Phase 6 — Prometheus + Grafana + alerts — ⏳ pending
 ## Phase 7 — Frontend + pipeline viz screens — ⏳ pending
 ## Phase 8 — CI/CD + rollback — ⏳ pending

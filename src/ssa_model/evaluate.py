@@ -74,7 +74,16 @@ def run(
     configure_mlflow(tracking_uri)
 
     uri = Path(uri_path).read_text(encoding="utf-8").strip()
-    run_id = uri.split("runs:/")[1].split("/")[0]
+    # `runs:/<run_id>/model` or `models:/m-<id>` — we need the actual
+    # MLflow run that produced it so we can attach test metrics.
+    if uri.startswith("runs:/"):
+        run_id = uri.split("runs:/")[1].split("/")[0]
+    else:
+        # `models:/m-<id>` form — look up the run_id from train_metrics.json
+        train_metrics = json.loads(
+            Path("artifacts/train_metrics.json").read_text(encoding="utf-8")
+        )
+        run_id = train_metrics["run_id"]
     client = mlflow.tracking.MlflowClient()
     bundle = _load_bundle_for_run(run_id)
     featurizer = bundle["vectorizer"]

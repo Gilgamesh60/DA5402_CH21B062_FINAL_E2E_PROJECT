@@ -195,15 +195,16 @@ def run(
         joblib.dump({"vectorizer": featurizer, "classifier": clf}, bundle_path)
         mlflow.log_artifact(str(bundle_path), artifact_path="bundle")
 
-        # Log the sklearn classifier via mlflow.sklearn for models-serve.
-        # The signature is inferred from the transformed val set; the live
-        # serving path wraps raw text -> transform -> predict in Phase 5.
-        mlflow.sklearn.log_model(
-            clf,
-            artifact_path="model",
+        # Log a pyfunc that accepts raw text at serve time. The pyfunc
+        # bundles (vectorizer, classifier) into a single model so the
+        # API gateway never needs to know about sparse matrices.
+        from ssa_model.pyfunc_wrapper import log_pyfunc_model
+
+        model_uri = log_pyfunc_model(
+            bundle_path=bundle_path,
+            artifact_name="model",
             registered_model_name=cfg.registry_name,
         )
-        model_uri = f"runs:/{run.info.run_id}/model"
         logger.info(
             "training_done",
             run_id=run.info.run_id,
