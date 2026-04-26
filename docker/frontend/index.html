@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Sentiment — Phase 1</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            max-width: 720px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        h1 { color: #0f172a; }
+        code {
+            background: #f1f5f9;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            background: #f8fafc;
+        }
+        .ok { color: #16a34a; font-weight: 600; }
+        .err { color: #dc2626; font-weight: 600; }
+        ul { padding-left: 1.2rem; }
+    </style>
+</head>
+<body>
+    <h1>Stock Sentiment MLOps</h1>
+    <p><strong>Phase 1</strong> — infrastructure skeleton is up. The real React UI lands in Phase 7.</p>
+
+    <div class="card">
+        <h3>Service checks</h3>
+        <p>API: <span id="api-status">checking…</span></p>
+        <p>Model server (via API <code>/ready</code>): <span id="ready-status">checking…</span></p>
+    </div>
+
+    <div class="card">
+        <h3>Admin UIs</h3>
+        <ul>
+            <li><a href="http://localhost:5000" target="_blank">MLflow</a> — tracking + registry</li>
+            <li><a href="http://localhost:8080" target="_blank">Airflow</a> — <code>admin / admin</code></li>
+            <li><a href="http://localhost:9090" target="_blank">Prometheus</a></li>
+            <li><a href="http://localhost:3001" target="_blank">Grafana</a></li>
+            <li><a href="http://localhost:8000/docs" target="_blank">API docs</a> (Swagger)</li>
+        </ul>
+    </div>
+
+    <script>
+        async function check(url, el) {
+            try {
+                const r = await fetch(url);
+                el.textContent = r.ok ? `OK (${r.status})` : `FAIL (${r.status})`;
+                el.className = r.ok ? "ok" : "err";
+            } catch (e) {
+                el.textContent = "UNREACHABLE";
+                el.className = "err";
+            }
+        }
+        check("/api/health", document.getElementById("api-status"));
+        check("/api/ready",  document.getElementById("ready-status"));
+    </script>
+</body>
+</html>

@@ -15,7 +15,25 @@ Delivered:
 
 Problems faced: none yet.
 
-## Phase 1 — Infrastructure skeleton — ⏳ pending
+## Phase 1 — Infrastructure skeleton — ✅ complete
+
+Delivered:
+- `docker-compose.yml` with 10 services on a shared network: postgres, mlflow, model-server, api, airflow-init/webserver/scheduler, prometheus, grafana, frontend
+- Postgres init SQL creates `mlflow` / `airflow` databases and the `feedback` table
+- MLflow Dockerfile runs tracking server with postgres backend store + local artifact volume
+- API stub (`src/ssa_api/main.py`) exposes `/health`, `/ready`, `/metrics`, `/` with structlog JSON logs, Prometheus instrumentation, request-id middleware; `/ready` forwards to model-server
+- Model-server stub mimics the MLflow `/invocations` contract so Phase 4 can swap in the real thing
+- Frontend stub: nginx serving a status page that pings the API (proves loose coupling + proxy path)
+- Prometheus scrape config for api, model-server, airflow; alert rules for 5% error rate + p95 latency + feature drift
+- Grafana provisioned with Prometheus datasource + starter "API overview" dashboard
+- Placeholder Airflow DAG so the scheduler parses cleanly
+- DVC initialized with local remote
+- `.env` with dev defaults, `Makefile` with common targets, unit tests green (4/4)
+
+Problems faced:
+- Had to provide a fallback `airflow-init` service with `service_completed_successfully` depends_on to avoid race on Airflow DB migration
+- Initial pip install of `mypy` on Python 3.14 was slow; switched dev install to a targeted set of runtime deps for the Phase 1 unit tests
+- Docker daemon wasn't running locally during scaffolding; stack was validated via `docker compose config --quiet` and unit tests only. First live boot happens when Docker Desktop is running.
 ## Phase 2 — Data ingestion + EDA + baselines — ⏳ pending
 ## Phase 3 — Feature engineering package — ⏳ pending
 ## Phase 4 — MLflow + baseline training — ⏳ pending

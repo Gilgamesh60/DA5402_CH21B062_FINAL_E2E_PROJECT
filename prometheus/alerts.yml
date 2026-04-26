@@ -1,0 +1,41 @@
+groups:
+  - name: ssa-api
+    interval: 30s
+    rules:
+      - alert: APIHighErrorRate
+        # Fires when > 5% of requests return 5xx over 5 minutes
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API error rate above 5%"
+          description: "Error rate {{ $value | humanizePercentage }} over 5m window."
+
+      - alert: APIHighLatencyP95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket{path="/predict"}[5m]))
+          ) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 latency above 200ms on /predict"
+          description: "p95 is {{ $value }}s"
+
+  - name: ssa-drift
+    rules:
+      - alert: FeatureDriftDetected
+        # feature_drift_score emitted by ssa_monitoring in Phase 6
+        expr: feature_drift_score < 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Feature drift detected on {{ $labels.feature }}"
+          description: "KS-test p-value {{ $value }} below 0.05"

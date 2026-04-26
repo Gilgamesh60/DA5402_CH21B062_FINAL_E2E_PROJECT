@@ -1,9 +1,3 @@
-# Phase 0: placeholder only. Phase 1 fills in real service definitions.
-# Current state: validates YAML structure and defines the service names
-# we'll wire up next.
-
-version: "3.9"
-
 name: stock-sentiment-mlops
 
 networks:
@@ -13,22 +7,246 @@ networks:
 volumes:
   postgres-data:
   mlflow-artifacts:
-  dvc-remote:
   prometheus-data:
   grafana-data:
+  airflow-logs:
 
 services:
-  # Filled in Phase 1:
-  # frontend:
-  # api:
-  # model-server:
-  # mlflow:
-  # airflow-webserver:
-  # airflow-scheduler:
-  # postgres:
-  # prometheus:
-  # grafana:
-  placeholder:
-    image: hello-world
+  # -----------------------------------------------------------------
+  # Postgres: shared RDBMS for MLflow + Airflow + feedback
+  # -----------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
+  # MLflow: tracking server + model registry (postgres-backed)
+  # -----------------------------------------------------------------
+  mlflow:
+    build:
+      context: .
+      dockerfile: docker/mlflow/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/mlflow
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+    volumes:
+      - mlflow-artifacts:/mlflow/artifacts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
+  # Model server: mlflow models serve (stub in Phase 1)
+  # -----------------------------------------------------------------
+  model-server:
+    build:
+      context: .
+      dockerfile: docker/model-server/Dockerfile
+    ports:
+      - "5001:5001"
+    environment:
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
+  # FastAPI gateway (stub in Phase 1 — real impl lands in Phase 5)
+  # -----------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      MODEL_SERVER_URL: ${MODEL_SERVER_URL}
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI}
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      model-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
+  # Airflow: webserver + scheduler (LocalExecutor for simplicity)
+  # -----------------------------------------------------------------
+  airflow-init:
+    image: apache/airflow:2.8.1-python3.10
+    user: "${AIRFLOW_UID}:0"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+    entrypoint: /bin/bash
+    command: -c "airflow db migrate && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@local || true"
+    volumes:
+      - airflow-logs:/opt/airflow/logs
+      - ./airflow/dags:/opt/airflow/dags
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ssa-net
+
+  airflow-webserver:
+    image: apache/airflow:2.8.1-python3.10
+    user: "${AIRFLOW_UID}:0"
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+    command: webserver
+    volumes:
+      - airflow-logs:/opt/airflow/logs
+      - ./airflow/dags:/opt/airflow/dags
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - ssa-net
+
+  airflow-scheduler:
+    image: apache/airflow:2.8.1-python3.10
+    user: "${AIRFLOW_UID}:0"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    command: scheduler
+    volumes:
+      - airflow-logs:/opt/airflow/logs
+      - ./airflow/dags:/opt/airflow/dags
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
+  # Prometheus: scrapes every service on 5s interval
+  # -----------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
+  # Grafana: dashboards + alerts
+  # -----------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:10.3.1
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
+  # Frontend: stub nginx page in Phase 1, React app in Phase 7
+  # -----------------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ssa-net
