@@ -1,0 +1,17 @@
+# HELP feature_drift_pvalue KS-test p-value per numeric feature (lower = more drift)
+# TYPE feature_drift_pvalue gauge
+feature_drift_pvalue{feature="text_length_chars"} 2.6e-05
+feature_drift_pvalue{feature="word_count"} 8e-05
+# HELP feature_drift_jsd Jensen-Shannon divergence per categorical feature (higher = more drift)
+# TYPE feature_drift_jsd gauge
+feature_drift_jsd{feature="ticker"} 0.0
+feature_drift_jsd{feature="source"} 0.0
+# HELP drift_detected 1 if drift detected for this signal type, 0 otherwise
+# TYPE drift_detected gauge
+drift_detected{type="numeric"} 1
+drift_detected{type="categorical"} 0
+drift_detected{type="class_ratio"} 0
+drift_detected{type="any"} 1
+# HELP drift_last_run_timestamp Unix timestamp of the last drift computation
+# TYPE drift_last_run_timestamp gauge
+drift_last_run_timestamp 1777227122

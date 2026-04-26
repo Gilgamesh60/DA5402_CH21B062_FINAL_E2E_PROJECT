@@ -5,9 +5,12 @@ strict digraph {
 "features";
 "train";
 "evaluate";
+"drift";
 "ingest" -> "validate";
 "validate" -> "eda_baselines";
 "validate" -> "features";
+"validate" -> "drift";
+"eda_baselines" -> "drift";
 "features" -> "train";
 "features" -> "evaluate";
 "train" -> "evaluate";

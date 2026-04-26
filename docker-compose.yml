@@ -198,6 +198,27 @@ services:
       - ssa-net
 
   # -----------------------------------------------------------------
+  # Drift exporter: serves `artifacts/drift_metrics.prom` at /metrics.
+  # Populated by the Airflow drift DAG; Prometheus scrapes it like any
+  # other target.
+  # -----------------------------------------------------------------
+  drift-exporter:
+    build:
+      context: .
+      dockerfile: docker/drift-exporter/Dockerfile
+    ports:
+      - "9101:9101"
+    volumes:
+      - ./artifacts:/metrics:ro
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:9101/health').read()\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
   # Prometheus: scrapes every service on 5s interval
   # -----------------------------------------------------------------
   prometheus:

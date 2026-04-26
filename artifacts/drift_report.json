@@ -1,0 +1,26 @@
+{
+  "status": "ok",
+  "generated_at": "2026-04-26T18:12:02.155918+00:00",
+  "sample_size": 300,
+  "numeric": {
+    "text_length_chars": 2.6e-05,
+    "word_count": 8e-05
+  },
+  "categorical": {
+    "ticker": 0.0,
+    "source": 0.0
+  },
+  "prediction_ratios": {},
+  "prediction_zscores": {},
+  "thresholds": {
+    "p_value": 0.05,
+    "jsd": 0.1,
+    "zscore": 2.0
+  },
+  "drift_detected": {
+    "numeric": true,
+    "categorical": false,
+    "class_ratio": false,
+    "any": true
+  }
+}

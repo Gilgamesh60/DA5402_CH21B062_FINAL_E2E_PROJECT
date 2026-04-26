@@ -3,7 +3,8 @@ groups:
     interval: 30s
     rules:
       - alert: APIHighErrorRate
-        # Fires when > 5% of requests return 5xx over 5 minutes
+        # Fires when > 5% of requests return 5xx over 5 minutes.
+        # Matches the MLOps guidelines threshold exactly.
         expr: |
           sum(rate(http_requests_total{status=~"5.."}[5m]))
           /
@@ -16,6 +17,7 @@ groups:
           description: "Error rate {{ $value | humanizePercentage }} over 5m window."
 
       - alert: APIHighLatencyP95
+        # Business metric threshold: /predict p95 < 200ms.
         expr: |
           histogram_quantile(
             0.95,
@@ -28,14 +30,54 @@ groups:
           summary: "p95 latency above 200ms on /predict"
           description: "p95 is {{ $value }}s"
 
+      - alert: APIDown
+        # The `up` metric goes 0 when a scrape target is unreachable.
+        expr: up{job="api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API target is unreachable by Prometheus"
+
   - name: ssa-drift
+    interval: 1m
     rules:
-      - alert: FeatureDriftDetected
-        # feature_drift_score emitted by ssa_monitoring in Phase 6
-        expr: feature_drift_score < 0.05
+      - alert: FeatureDriftNumeric
+        # KS p-value below 0.05 on any numeric feature.
+        expr: feature_drift_pvalue < 0.05
         for: 10m
         labels:
           severity: warning
         annotations:
-          summary: "Feature drift detected on {{ $labels.feature }}"
-          description: "KS-test p-value {{ $value }} below 0.05"
+          summary: "Numeric feature drift on {{ $labels.feature }}"
+          description: "KS p-value {{ $value }} below 0.05"
+
+      - alert: FeatureDriftCategorical
+        # Jensen-Shannon divergence above 0.1 on any categorical field.
+        expr: feature_drift_jsd > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Categorical drift on {{ $labels.feature }}"
+          description: "JSD {{ $value }} above 0.1"
+
+      - alert: PredictionClassRatioAnomaly
+        # Aggregate z-score anomaly — |z| > 2 on any class sustained 10m.
+        expr: abs(prediction_class_ratio_zscore) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prediction class ratio anomaly on {{ $labels.label }}"
+          description: "z-score {{ $value }} beyond ±2σ"
+
+      - alert: DriftJobStale
+        # No drift run in the last 2 hours — usually means the Airflow
+        # DAG is broken.
+        expr: time() - drift_last_run_timestamp > 7200
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Drift job hasn't run in > 2h"

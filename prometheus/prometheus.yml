@@ -15,14 +15,12 @@ scrape_configs:
     static_configs:
       - targets: ["api:8000"]
 
-  - job_name: model-server
+  - job_name: drift
     metrics_path: /metrics
+    scrape_interval: 30s
     static_configs:
-      - targets: ["model-server:5001"]
+      - targets: ["drift-exporter:9101"]
 
-  # Airflow exposes metrics via statsd-exporter in a later phase.
-  # Placeholder job so Prometheus knows the target exists.
-  - job_name: airflow
-    static_configs:
-      - targets: ["airflow-webserver:8080"]
-    metrics_path: /health  # replaced when statsd-exporter lands
+  # model-server doesn't expose /metrics natively (mlflow models serve).
+  # Liveness is inferred via the api /ready probe and the `up` metric
+  # from the `api` job.

@@ -9,9 +9,9 @@ stages:
       size: 80346
     - path: src/ssa_ingestion
       hash: md5
-      md5: 4071f49ef909d476c73da3ffc50a85af.dir
-      size: 77308
-      nfiles: 22
+      md5: 753811ad0fb0a31085de03ebfeabb179.dir
+      size: 106914
+      nfiles: 33
     params:
       params.yaml:
         ingestion:
@@ -43,7 +43,7 @@ stages:
     outs:
     - path: artifacts/ingestion_report.json
       hash: md5
-      md5: 9e1d767c8ab26292973a6d12b2913cd5
+      md5: df7290d3879a87dd0e822f3ec067122b
       size: 266
     - path: data/raw/records.parquet
       hash: md5
@@ -101,11 +101,11 @@ stages:
     outs:
     - path: artifacts/baselines.json
       hash: md5
-      md5: 454d6fcaf25daf8f3ee68fd9d4393761
+      md5: d2e1c6db9c7a8c7a4589f08bd6484c40
       size: 956
     - path: artifacts/eda_summary.md
       hash: md5
-      md5: 642116c6ab9f408b028bfdcd5964255e
+      md5: e8f514cf044aa240f59f9762bec6e3be
       size: 663
   features:
     cmd: python3 -m ssa_features.pipeline
@@ -243,3 +243,32 @@ stages:
       hash: md5
       md5: 087438a9ef33870e02d23c12e8b8ced5
       size: 339
+  drift:
+    cmd: python3 -m ssa_monitoring.drift
+    deps:
+    - path: artifacts/baselines.json
+      hash: md5
+      md5: d2e1c6db9c7a8c7a4589f08bd6484c40
+      size: 956
+    - path: data/interim/validated.parquet
+      hash: md5
+      md5: fe2a41a3dc4296a940c96b1092f54856
+      size: 13094
+    - path: src/ssa_monitoring/drift.py
+      hash: md5
+      md5: 8c1d40cd10f3dd2850178f3f30f0ec10
+      size: 10244
+    params:
+      params.yaml:
+        monitoring.drift:
+          method: ks_test
+          p_value_threshold: 0.05
+    outs:
+    - path: artifacts/drift_metrics.prom
+      hash: md5
+      md5: 0771fd514af62981edcf370d613950b2
+      size: 825
+    - path: artifacts/drift_report.json
+      hash: md5
+      md5: 7741d78741def9c93f7b0bc03e9cf2f0
+      size: 484

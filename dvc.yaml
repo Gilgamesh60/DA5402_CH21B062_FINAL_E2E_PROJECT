@@ -91,3 +91,18 @@ stages:
           cache: false
       - artifacts/promotion_decision.json:
           cache: false
+
+  drift:
+    cmd: python3 -m ssa_monitoring.drift
+    deps:
+      - data/interim/validated.parquet
+      - artifacts/baselines.json
+      - src/ssa_monitoring/drift.py
+    params:
+      - monitoring.drift
+    outs:
+      - artifacts/drift_metrics.prom:
+          cache: false
+    metrics:
+      - artifacts/drift_report.json:
+          cache: false

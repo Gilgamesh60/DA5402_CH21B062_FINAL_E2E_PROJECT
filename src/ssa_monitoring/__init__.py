@@ -1,6 +1,7 @@
-"""Drift detection and Prometheus exporters.
+"""Monitoring and drift detection.
 
-Populated in Phase 6. Compares live feature stats to artifacts/baselines.json.
+Provides drift metrics as a Prometheus exposition file that a sidecar
+exporter serves. The API package already exposes its own /metrics.
 """
 
 __version__ = "0.1.0"
