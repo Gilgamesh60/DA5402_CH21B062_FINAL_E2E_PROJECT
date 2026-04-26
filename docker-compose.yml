@@ -277,7 +277,11 @@ services:
     ports:
       - "3000:80"
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+      VITE_API_BASE_URL: /api
+      MLFLOW_URL: http://localhost:5000
+      AIRFLOW_URL: http://localhost:8080
+      GRAFANA_URL: http://localhost:3001
+      PROMETHEUS_URL: http://localhost:9090
     depends_on:
       api:
         condition: service_healthy

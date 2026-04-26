@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stock Sentiment MLOps</title>
+    <!--
+      Runtime config. The container entrypoint replaces this file at boot
+      with the values from VITE_API_BASE_URL and friends, so the same
+      Docker image works across dev / demo / prod without rebuilds.
+    -->
+    <script src="/config.js"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

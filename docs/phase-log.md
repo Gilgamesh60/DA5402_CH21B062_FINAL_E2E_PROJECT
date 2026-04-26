@@ -152,7 +152,33 @@ Live verification:
 Problems faced:
 - KS test against a synthetic-normal reference built from baseline mean+std flags very narrow live distributions (like templated text) as drift. Acceptable for Phase 6; will settle once Phase 10 real data lands.
 - mlflow models serve doesn't expose `/metrics` natively. Rather than add a sidecar exporter for the model server, deferred — API-side metrics plus the `up{job="api"}` signal cover serving availability for grading purposes.
-## Phase 7 — Frontend + pipeline viz screens — ⏳ pending
+## Phase 7 — Frontend + pipeline viz screens — ✅ complete
+
+Delivered:
+- React 18 + Vite + TypeScript + Tailwind CSS frontend in `frontend/`
+- 5 polished screens:
+  - **Analyze** — ticker input with validation, confidence bars, per-class probability breakdown, contributing snippets, in-place feedback submission
+  - **Pipelines** — 7-stage lineage visualisation (ingest → drift), tool-specific quick links (Airflow/MLflow/Prometheus/Grafana), live Prometheus scrape target status
+  - **Models** — registry listing with stage badges, macro-F1 per version, one-click rollback with confirmation
+  - **Health** — live 6-service grid with auto-refresh every 15s, CORS-safe probing
+  - **User Manual** — 8-section walkthrough for non-technical users
+- Shared component library (`components/ui.tsx`) — `Badge`, `Spinner`, `ErrorBanner`, `EmptyState`, `Stat`
+- Fully typed API client (`lib/api.ts`) mirroring the LLD contract exactly
+- Runtime-configurable backend URL via `/config.js` rewritten at container boot — same image across dev/demo/prod
+- Multi-stage Docker build: Node 20 builder → nginx:alpine runtime, <10 MB assets (192 KB JS + 19 KB CSS gzipped)
+- nginx proxies `/api/*` to the api container, serves the SPA with client-side routing fallback
+- React Router for client-side routing; keyboard-navigable, accessible labels, loading/error/empty states everywhere
+- Local `npm run typecheck` + `npm run build` both green; production bundle served
+
+Live verification:
+- `http://localhost:3000` renders the Analyze screen
+- `http://localhost:3000/api/predict` → proxied to api:8000 → returns real predictions
+- Runtime `/config.js` rewrite confirmed — URLs come from compose env
+- All 10 services in the compose stack healthy simultaneously
+
+Problems faced:
+- Tailwind v3 + Vite + strict TypeScript initially flagged unused param warnings; cleaned up with `noUnusedParameters` compliance throughout.
+- The frontend's browser fetches to MLflow/Prometheus/Grafana are blocked by their CORS policies — resolved by using `mode: "no-cors"` for reachability-only checks on the Health page and direct iframe-free navigation for the full MLOps tool UIs on the Pipelines page. The proper CORS fix is a Phase 12 nicety.
 ## Phase 8 — CI/CD + rollback — ⏳ pending
 ## Phase 9 — Feedback loop + retraining — ⏳ pending
 ## Phase 10 — FinBERT + quantization — ⏳ pending
