@@ -1,6 +1,7 @@
 """Model training, evaluation, and registry interaction.
 
-Populated in Phase 4. Depends on ssa_features for input vectors.
+Version is stamped into every MLflow run so feature/model version
+mismatches are detectable across experiments.
 """
 
 __version__ = "0.1.0"

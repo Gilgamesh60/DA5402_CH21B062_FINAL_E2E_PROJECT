@@ -1,0 +1,11 @@
+{
+  "run_id": "e969cbfe57ca437aa0f6bfee5ffb59c0",
+  "registered_version": "2",
+  "primary_metric": "macro_f1",
+  "primary_value": 1.0,
+  "acceptance_threshold": 0.75,
+  "passed_acceptance": true,
+  "promoted_to_production": false,
+  "promoted_to_staging": true,
+  "reason": "kept in Staging \u2014 no improvement over current Production"
+}

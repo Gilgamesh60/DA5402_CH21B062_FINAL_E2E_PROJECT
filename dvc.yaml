@@ -59,9 +59,35 @@ stages:
           cache: false
 
   train:
-    cmd: echo "TODO Phase 4 - train + log to MLflow"
-    # Stubbed; Phase 4 fills in.
+    cmd: python3 -m ssa_model.train
+    deps:
+      - data/processed/train.parquet
+      - data/processed/val.parquet
+      - artifacts/vectorizer.joblib
+      - src/ssa_model
+    params:
+      - training
+      - registry.model_name
+    outs:
+      - artifacts/model_uri.txt:
+          cache: false
+    metrics:
+      - artifacts/train_metrics.json:
+          cache: false
 
   evaluate:
-    cmd: echo "TODO Phase 4 - evaluate + register"
-    # Stubbed; Phase 4 fills in.
+    cmd: python3 -m ssa_model.evaluate
+    deps:
+      - data/processed/test.parquet
+      - artifacts/model_uri.txt
+      - src/ssa_model/evaluate.py
+      - src/ssa_model/metrics.py
+      - src/ssa_model/registry.py
+    params:
+      - evaluation
+      - registry
+    metrics:
+      - artifacts/eval_metrics.json:
+          cache: false
+      - artifacts/promotion_decision.json:
+          cache: false

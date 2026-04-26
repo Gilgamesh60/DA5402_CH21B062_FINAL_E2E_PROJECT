@@ -1,0 +1,24 @@
+{
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "weighted_f1": 1.0,
+  "per_class": {
+    "positive": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "neutral": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "negative": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "classification_report": "              precision    recall  f1-score   support\n\n    positive     1.0000    1.0000    1.0000        22\n     neutral     1.0000    1.0000    1.0000        19\n    negative     1.0000    1.0000    1.0000        20\n\n    accuracy                         1.0000        61\n   macro avg     1.0000    1.0000    1.0000        61\nweighted avg     1.0000    1.0000    1.0000        61\n",
+  "log_loss": 0.215018
+}

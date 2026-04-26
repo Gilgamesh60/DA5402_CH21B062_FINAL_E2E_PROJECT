@@ -79,7 +79,25 @@ Delivered:
 Problems faced:
 - `train_test_split` throws on tiny classes; added a fallback to non-stratified split when any class has < 2 samples. Not hit by the current seed corpus but future-proofs live runs.
 - Initially put `text_clean` inside the vectorizer so serving could pass raw text, but the persisted splits then didn't carry the cleaned version. Moved cleaning to happen once in `pipeline.run()` and stored `text_clean` as a first-class column in the parquets so Phase 4 training, Phase 6 drift detection, and Phase 11 test fixtures all look at identical inputs.
-## Phase 4 — MLflow + baseline training — ⏳ pending
+## Phase 4 — MLflow + baseline training — ✅ complete
+
+Delivered:
+- `ssa_model` package with four modules: `reproducibility`, `metrics`, `tracking`, `train`, `evaluate`, `registry`
+- `tracking.mlflow_run` context manager stamps git SHA, DVC data hash, params snapshot, pip freeze, and hardware fingerprint on every run — satisfies the "beyond autolog" rubric item
+- Baseline Logistic Regression trains in under 0.02 s on the seed corpus
+- Registry versioning: new versions start in Staging; promotion to Production requires beating the incumbent by `registry.staging_threshold_delta` (0.01 macro-F1 default)
+- `evaluate` stage runs holdout test, decides promotion, writes `artifacts/promotion_decision.json`
+- `dvc.yaml` now has all six real stages fully connected: `ingest → validate → {eda_baselines, features → train → evaluate}`
+- Two live runs completed: v1 promoted to Production, v2 kept in Staging (no improvement)
+- 9 new unit tests (reproducibility + metrics); full suite: 37 tests passing
+- DVC DAG exported to `docs/diagrams/dvc-dag.dot`, ready for the pipeline viz screen
+
+Problems faced:
+- sklearn 1.7 removed the `multi_class` kwarg from `LogisticRegression`; dropped it from the builder.
+- MLflow artifact writes failed with `OSError: Read-only file system: '/mlflow'`. Root cause: by default `mlflow server` sets each new experiment's `artifact_location` to the local filesystem path `/mlflow/artifacts/<id>`, which the client then tries to write to directly — but the client was on the host, not inside the container. Fix: start the server with `--default-artifact-root mlflow-artifacts:/` + `--artifacts-destination <container-path>` so clients receive proxy URIs and upload over HTTP.
+- Wiped and recreated the `mlflow` Postgres database after the fix because existing experiments had the bad `artifact_location` baked in.
+- Client (venv) was MLflow 3.11.1 while server was still 2.10.2 — client called endpoints the server didn't have. Pinned the server Dockerfile to `mlflow==3.11.1` to match.
+- MLflow 3.x emits `FutureWarning` for `transition_model_version_stage` in favour of aliases, but the evaluation rubric explicitly expects stage-based promotion. Left the warnings in place; migration to aliases is a Phase-post-grading concern.
 ## Phase 5 — FastAPI gateway + model server — ⏳ pending
 ## Phase 6 — Prometheus + Grafana + alerts — ⏳ pending
 ## Phase 7 — Frontend + pipeline viz screens — ⏳ pending

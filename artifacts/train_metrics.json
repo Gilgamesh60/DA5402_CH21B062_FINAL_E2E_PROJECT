@@ -1,0 +1,31 @@
+{
+  "run_id": "e969cbfe57ca437aa0f6bfee5ffb59c0",
+  "model_uri": "runs:/e969cbfe57ca437aa0f6bfee5ffb59c0/model",
+  "train_seconds": 0.0127,
+  "val_metrics": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "per_class": {
+      "positive": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "neutral": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "negative": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    },
+    "classification_report": "              precision    recall  f1-score   support\n\n    positive     1.0000    1.0000    1.0000        11\n     neutral     1.0000    1.0000    1.0000        10\n    negative     1.0000    1.0000    1.0000         9\n\n    accuracy                         1.0000        30\n   macro avg     1.0000    1.0000    1.0000        30\nweighted avg     1.0000    1.0000    1.0000        30\n",
+    "log_loss": 0.182307
+  },
+  "model_package_version": "0.1.0",
+  "feature_package_version": "0.2.0"
+}

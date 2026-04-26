@@ -162,6 +162,84 @@ stages:
       md5: 061aac92c100f3735ba339efd9b388f7
       size: 7419
   train:
-    cmd: echo "TODO Phase 4 - train + log to MLflow"
+    cmd: python3 -m ssa_model.train
+    deps:
+    - path: artifacts/vectorizer.joblib
+      hash: md5
+      md5: 2ed5eb720008dfa9dca0c1b814bf9846
+      size: 19782
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 9766dd88e8a24fa52b3548374f929b6d
+      size: 12723
+    - path: data/processed/val.parquet
+      hash: md5
+      md5: 061aac92c100f3735ba339efd9b388f7
+      size: 7419
+    - path: src/ssa_model
+      hash: md5
+      md5: 61dedc2b2b377c9f090cb44328b3dd49.dir
+      size: 73457
+      nfiles: 14
+    params:
+      params.yaml:
+        registry.model_name: stock-sentiment
+        training:
+          model_type: logistic_regression
+          test_size: 0.2
+          val_size: 0.1
+          random_seed: 42
+          class_weight: balanced
+          hyperparameters:
+            C: 1.0
+            max_iter: 1000
+    outs:
+    - path: artifacts/model_uri.txt
+      hash: md5
+      md5: 3ebdebc9723ad39719669f84c0a1b72d
+      size: 45
+    - path: artifacts/train_metrics.json
+      hash: md5
+      md5: 5685232313bf2de9197d0a25a3d55a08
+      size: 1063
   evaluate:
-    cmd: echo "TODO Phase 4 - evaluate + register"
+    cmd: python3 -m ssa_model.evaluate
+    deps:
+    - path: artifacts/model_uri.txt
+      hash: md5
+      md5: 3ebdebc9723ad39719669f84c0a1b72d
+      size: 45
+    - path: data/processed/test.parquet
+      hash: md5
+      md5: 4541f63587aeab93f657df68cbec0ed6
+      size: 9280
+    - path: src/ssa_model/evaluate.py
+      hash: md5
+      md5: 6b463d4e281e7371ab12f4f445173b91
+      size: 7233
+    - path: src/ssa_model/metrics.py
+      hash: md5
+      md5: 69bd2a4d855bb75c2a4e8cd243070deb
+      size: 2947
+    - path: src/ssa_model/registry.py
+      hash: md5
+      md5: d49f0464d6f6c24251b51413a2985315
+      size: 3622
+    params:
+      params.yaml:
+        evaluation:
+          primary_metric: macro_f1
+          acceptance_threshold: 0.75
+        registry:
+          model_name: stock-sentiment
+          promote_on_improvement: true
+          staging_threshold_delta: 0.01
+    outs:
+    - path: artifacts/eval_metrics.json
+      hash: md5
+      md5: 3ab35902c2e41046b94937501b791b23
+      size: 784
+    - path: artifacts/promotion_decision.json
+      hash: md5
+      md5: 087438a9ef33870e02d23c12e8b8ced5
+      size: 339

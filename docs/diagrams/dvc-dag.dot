@@ -8,5 +8,8 @@ strict digraph {
 "ingest" -> "validate";
 "validate" -> "eda_baselines";
 "validate" -> "features";
+"features" -> "train";
+"features" -> "evaluate";
+"train" -> "evaluate";
 }
 
