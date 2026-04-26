@@ -6,10 +6,18 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint-and-test:
+  # ---------------------------------------------------------------
+  # Python: lint, type, unit tests on 3.10 + 3.11
+  # ---------------------------------------------------------------
+  python:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11"]
 
@@ -27,7 +35,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,ingestion,model]"
 
       - name: Ruff
         run: ruff check src tests
@@ -40,27 +48,60 @@ jobs:
 
       - name: Mypy
         run: mypy src
-        continue-on-error: true  # relax until Phase 5 when types stabilize
+        continue-on-error: true  # relaxed while mlflow stubs are incomplete
 
       - name: Unit tests
-        run: pytest tests/unit -v --cov=src --cov-report=xml
+        run: pytest tests/unit -v --cov=src --cov-report=xml --cov-report=term
 
       - name: Upload coverage
+        if: matrix.python-version == '3.11'
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.python-version }}
+          name: coverage-xml
           path: coverage.xml
 
-  dvc-dag:
+  # ---------------------------------------------------------------
+  # Frontend: TypeScript build
+  # ---------------------------------------------------------------
+  frontend:
     runs-on: ubuntu-latest
-    needs: lint-and-test
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.10"
-      - name: Install DVC
-        run: pip install "dvc>=3.40"
-      - name: Validate DVC DAG
-        run: dvc dag --dot > dvc-dag.dot || true
-        # Phase 2+ will make this strict
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci || npm install --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+
+  # ---------------------------------------------------------------
+  # Docker compose config + build validation
+  # ---------------------------------------------------------------
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose config
+        run: docker compose config --quiet
+
+      - name: Build all images
+        run: docker compose build --parallel

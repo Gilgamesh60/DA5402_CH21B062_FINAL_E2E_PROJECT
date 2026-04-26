@@ -1,0 +1,90 @@
+name: DVC pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/ssa_ingestion/**"
+      - "src/ssa_features/**"
+      - "src/ssa_monitoring/**"
+      - "data/seed/**"
+      - "params.yaml"
+      - "dvc.yaml"
+      - "dvc.lock"
+  pull_request:
+    paths:
+      - "src/ssa_ingestion/**"
+      - "src/ssa_features/**"
+      - "src/ssa_monitoring/**"
+      - "data/seed/**"
+      - "params.yaml"
+      - "dvc.yaml"
+      - "dvc.lock"
+  workflow_dispatch:
+
+concurrency:
+  group: dvc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------
+  # Repro the data + feature + drift stages. Train/evaluate are
+  # excluded because they require a live MLflow server.
+  # ---------------------------------------------------------------
+  repro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,ingestion]"
+
+      - name: Show DVC status
+        run: dvc status || true
+
+      - name: Repro data + features + drift
+        run: |
+          dvc repro ingest validate eda_baselines features drift
+
+      - name: Validate outputs exist
+        run: |
+          test -f data/raw/records.parquet
+          test -f data/interim/validated.parquet
+          test -f artifacts/baselines.json
+          test -f artifacts/vectorizer.joblib
+          test -f artifacts/drift_metrics.prom
+          test -f data/processed/train.parquet
+
+      - name: Export DVC DAG
+        run: |
+          mkdir -p docs/diagrams
+          dvc dag --dot > docs/diagrams/dvc-dag.dot
+          echo "=== DAG ===" && dvc dag
+
+      - name: Upload DAG
+        uses: actions/upload-artifact@v4
+        with:
+          name: dvc-dag
+          path: docs/diagrams/dvc-dag.dot
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: dvc-reports
+          path: |
+            artifacts/ingestion_report.json
+            artifacts/validation_report.json
+            artifacts/baselines.json
+            artifacts/eda_summary.md
+            artifacts/feature_report.json
+            artifacts/drift_report.json
+            artifacts/drift_metrics.prom

@@ -1,4 +1,4 @@
-.PHONY: help install up down logs ps rebuild test lint format clean
+.PHONY: help install up down logs ps rebuild test lint format clean rollback dag
 
 help:
 	@echo "Common targets:"
@@ -11,6 +11,8 @@ help:
 	@echo "  make test        Run unit tests"
 	@echo "  make lint        Run ruff, black --check, isort --check, mypy"
 	@echo "  make format      Auto-format with black + isort + ruff --fix"
+	@echo "  make dag         Print + export the DVC DAG"
+	@echo "  make rollback V=<version>  Roll the registered model to V"
 	@echo "  make clean       Remove caches and build artifacts"
 
 install:
@@ -49,3 +51,17 @@ format:
 clean:
 	rm -rf .pytest_cache .mypy_cache .ruff_cache build dist *.egg-info
 	find . -name __pycache__ -type d -exec rm -rf {} +
+
+dag:
+	dvc dag
+	mkdir -p docs/diagrams
+	dvc dag --dot > docs/diagrams/dvc-dag.dot
+	@echo "wrote docs/diagrams/dvc-dag.dot"
+
+rollback:
+	@if [ -z "$(V)" ]; then echo "Usage: make rollback V=<version> [RESTART=1]"; exit 1; fi
+	@if [ "$(RESTART)" = "1" ]; then \
+		python scripts/rollback.py $(V) --restart; \
+	else \
+		python scripts/rollback.py $(V); \
+	fi

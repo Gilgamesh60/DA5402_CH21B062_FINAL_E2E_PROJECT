@@ -179,7 +179,22 @@ Live verification:
 Problems faced:
 - Tailwind v3 + Vite + strict TypeScript initially flagged unused param warnings; cleaned up with `noUnusedParameters` compliance throughout.
 - The frontend's browser fetches to MLflow/Prometheus/Grafana are blocked by their CORS policies — resolved by using `mode: "no-cors"` for reachability-only checks on the Health page and direct iframe-free navigation for the full MLOps tool UIs on the Pipelines page. The proper CORS fix is a Phase 12 nicety.
-## Phase 8 — CI/CD + rollback — ⏳ pending
+## Phase 8 — CI/CD + rollback — ✅ complete
+
+Delivered:
+- `.github/workflows/ci.yml` — three-job CI on every push + PR:
+  - **python** — matrix on 3.10 + 3.11: ruff, black, isort, mypy, pytest with coverage, coverage-xml artifact
+  - **frontend** — TS typecheck + Vite production build, dist/ uploaded as artifact
+  - **docker** — `docker compose config --quiet` and `docker compose build --parallel` to catch Dockerfile drift
+- `.github/workflows/dvc.yml` — runs `dvc repro ingest validate eda_baselines features drift` when data/feature code changes, validates expected outputs exist, exports `dvc-dag.dot` and all reports as build artifacts. This is the rubric's "DVC DAG representing your CI pipeline".
+- `.github/workflows/rollback.yml` — manual `workflow_dispatch` with `target_version` and `dry_run` inputs, preflight listing of current stages, GitHub Step Summary with post-rollback instructions
+- `scripts/rollback.py` — local CLI mirroring the workflow so developers can roll back without pushing, with `--restart` to bounce the model-server
+- `Makefile` gains `make dag` and `make rollback V=<n> [RESTART=1]` targets
+- `tests/integration/test_compose_config.py` — 2 integration tests validating compose config + expected service set
+- Rollback end-to-end verified live: v1 → v2 promotion → v1 rollback, all visible via `/model/versions`
+
+Problems faced:
+- No new blockers. All three workflows syntactically valid; rollback flow proven against the live MLflow server.
 ## Phase 9 — Feedback loop + retraining — ⏳ pending
 ## Phase 10 — FinBERT + quantization — ⏳ pending
 ## Phase 11 — Tests + report — ⏳ pending
