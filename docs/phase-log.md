@@ -45,7 +45,25 @@ Live boot verification (Colima, aarch64):
 - MLflow, Airflow, Prometheus, Grafana, Frontend all return 200 on their health endpoints ✓
 - Prometheus actively scraping `api` and `prometheus` (model-server and airflow pending their proper exporters)
 - Grafana dashboard `ssa-api-overview` provisioned and queryable
-## Phase 2 — Data ingestion + EDA + baselines — ⏳ pending
+## Phase 2 — Data ingestion + EDA + baselines — ✅ complete
+
+Delivered:
+- Unified `TextRecord` Pydantic schema normalising news + social into one shape
+- Pluggable source adapters: `SeedSource` (always on), `NewsApiSource`, `RedditSource` (both opt-in via env vars)
+- Seed corpus generator → 300 labelled records across 7 tickers, deterministic (`scripts/generate_seed_corpus.py`)
+- `ssa_ingestion.pipeline` runs enabled sources, writes `data/raw/records.parquet` + `artifacts/ingestion_report.json` with duration + throughput
+- `ssa_ingestion.validation` re-checks schema, dedupes on `(id, source)`, enforces length + language, emits `artifacts/validation_report.json`, raises on zero surviving records
+- `ssa_ingestion.eda` computes drift baselines (mean/std/variance/quantiles on numeric features, normalised distributions for categoricals) → `artifacts/baselines.json` + human-readable `artifacts/eda_summary.md`
+- `dvc.yaml` now has three real stages: `ingest → validate → eda_baselines`, all wired with params, deps, outs, and metrics
+- `dvc repro` runs end-to-end cleanly; `dvc metrics show` surfaces throughput, record counts, per-ticker/per-source distributions
+- DVC DAG exported to `docs/diagrams/dvc-dag.dot` for the pipeline viz screen
+- Real Airflow DAG `ssa_ingestion` replaces the Phase 1 placeholder
+- 13 unit tests passing (6 new schema tests + 3 new end-to-end pipeline tests)
+- Performance numbers recorded in `docs/performance.md` (seed throughput ~3800–5800 rec/s)
+
+Problems faced:
+- `dvc repro` initially failed with "command not found: python" because DVC inherits the shell's PATH, and zsh on macOS doesn't alias `python` to `python3`. Fixed by switching the stage commands to `python3` and activating the venv before `dvc repro`.
+- Pandas serialises NaN values from parquet where Python expected `None`; added an explicit NaN→None normalisation step in `validation.run()` before handing rows to Pydantic.
 ## Phase 3 — Feature engineering package — ⏳ pending
 ## Phase 4 — MLflow + baseline training — ⏳ pending
 ## Phase 5 — FastAPI gateway + model server — ⏳ pending

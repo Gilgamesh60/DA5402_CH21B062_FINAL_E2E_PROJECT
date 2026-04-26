@@ -1,0 +1,11 @@
+strict digraph {
+"ingest";
+"validate";
+"eda_baselines";
+"features";
+"train";
+"evaluate";
+"ingest" -> "validate";
+"validate" -> "eda_baselines";
+}
+

@@ -1,62 +1,52 @@
 # DVC pipeline — the DAG that doubles as our CI pipeline.
-# Stages are stubs in Phase 0; each phase fills in its own.
 
 stages:
   ingest:
-    cmd: echo "TODO Phase 2 - run src/ssa_ingestion"
-    # deps:
-    #   - src/ssa_ingestion
-    # params:
-    #   - ingestion
-    # outs:
-    #   - data/raw
+    cmd: python3 -m ssa_ingestion.pipeline
+    deps:
+      - src/ssa_ingestion
+      - data/seed/seed_corpus.jsonl
+    params:
+      - ingestion
+    outs:
+      - data/raw/records.parquet
+    metrics:
+      - artifacts/ingestion_report.json:
+          cache: false
 
   validate:
-    cmd: echo "TODO Phase 2 - schema + quality checks"
-    # deps:
-    #   - data/raw
-    #   - src/ssa_ingestion/validation.py
-    # params:
-    #   - validation
-    # outs:
-    #   - data/interim/validated.parquet
+    cmd: python3 -m ssa_ingestion.validation
+    deps:
+      - data/raw/records.parquet
+      - src/ssa_ingestion/validation.py
+      - src/ssa_ingestion/schemas.py
+    params:
+      - validation
+    outs:
+      - data/interim/validated.parquet
+    metrics:
+      - artifacts/validation_report.json:
+          cache: false
 
   eda_baselines:
-    cmd: echo "TODO Phase 2 - produce artifacts/baselines.json"
-    # deps:
-    #   - data/interim/validated.parquet
-    #   - notebooks/eda.ipynb
-    # outs:
-    #   - artifacts/baselines.json
+    cmd: python3 -m ssa_ingestion.eda
+    deps:
+      - data/interim/validated.parquet
+      - src/ssa_ingestion/eda.py
+    outs:
+      - artifacts/baselines.json:
+          cache: false
+      - artifacts/eda_summary.md:
+          cache: false
 
   features:
     cmd: echo "TODO Phase 3 - build features"
-    # deps:
-    #   - data/interim/validated.parquet
-    #   - src/ssa_features
-    # params:
-    #   - features
-    # outs:
-    #   - data/processed/features.parquet
+    # Stubbed; Phase 3 fills in.
 
   train:
     cmd: echo "TODO Phase 4 - train + log to MLflow"
-    # deps:
-    #   - data/processed/features.parquet
-    #   - src/ssa_model
-    # params:
-    #   - training
-    # outs:
-    #   - artifacts/model_uri.txt
-    # metrics:
-    #   - artifacts/metrics.json
+    # Stubbed; Phase 4 fills in.
 
   evaluate:
     cmd: echo "TODO Phase 4 - evaluate + register"
-    # deps:
-    #   - artifacts/model_uri.txt
-    # params:
-    #   - evaluation
-    # metrics:
-    #   - artifacts/eval_metrics.json:
-    #       cache: false
+    # Stubbed; Phase 4 fills in.

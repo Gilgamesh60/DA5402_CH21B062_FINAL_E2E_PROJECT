@@ -1,0 +1,115 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python3 -m ssa_ingestion.pipeline
+    deps:
+    - path: data/seed/seed_corpus.jsonl
+      hash: md5
+      md5: 17c5e54e76d877324e3159517506cc2b
+      size: 80346
+    - path: src/ssa_ingestion
+      hash: md5
+      md5: 4071f49ef909d476c73da3ffc50a85af.dir
+      size: 77308
+      nfiles: 22
+    params:
+      params.yaml:
+        ingestion:
+          news:
+            sources:
+            - newsapi
+            - finnhub
+            lookback_hours: 24
+            languages:
+            - en
+            max_items_per_source: 500
+          social:
+            sources:
+            - reddit
+            subreddits:
+            - wallstreetbets
+            - stocks
+            - investing
+            lookback_hours: 24
+            max_posts: 1000
+          tickers:
+          - AAPL
+          - MSFT
+          - GOOGL
+          - AMZN
+          - TSLA
+          - NVDA
+          - META
+    outs:
+    - path: artifacts/ingestion_report.json
+      hash: md5
+      md5: 9e1d767c8ab26292973a6d12b2913cd5
+      size: 266
+    - path: data/raw/records.parquet
+      hash: md5
+      md5: fe2a41a3dc4296a940c96b1092f54856
+      size: 13094
+  validate:
+    cmd: python3 -m ssa_ingestion.validation
+    deps:
+    - path: data/raw/records.parquet
+      hash: md5
+      md5: fe2a41a3dc4296a940c96b1092f54856
+      size: 13094
+    - path: src/ssa_ingestion/schemas.py
+      hash: md5
+      md5: c1828d8a13406af86a82d6556ec82367
+      size: 3220
+    - path: src/ssa_ingestion/validation.py
+      hash: md5
+      md5: 5cc293a10880a8eb53450a8e283b0ae5
+      size: 3890
+    params:
+      params.yaml:
+        validation:
+          required_fields:
+          - id
+          - ticker
+          - text
+          - timestamp
+          - source
+          min_text_length: 10
+          max_text_length: 5000
+          dedupe_on:
+          - id
+          - source
+    outs:
+    - path: artifacts/validation_report.json
+      hash: md5
+      md5: f318520650c64fd50205dc37770b9f89
+      size: 326
+    - path: data/interim/validated.parquet
+      hash: md5
+      md5: fe2a41a3dc4296a940c96b1092f54856
+      size: 13094
+  eda_baselines:
+    cmd: python3 -m ssa_ingestion.eda
+    deps:
+    - path: data/interim/validated.parquet
+      hash: md5
+      md5: fe2a41a3dc4296a940c96b1092f54856
+      size: 13094
+    - path: src/ssa_ingestion/eda.py
+      hash: md5
+      md5: 0c88942bc9d1f04bfff084d90e5a2470
+      size: 4873
+    outs:
+    - path: artifacts/baselines.json
+      hash: md5
+      md5: 454d6fcaf25daf8f3ee68fd9d4393761
+      size: 956
+    - path: artifacts/eda_summary.md
+      hash: md5
+      md5: 642116c6ab9f408b028bfdcd5964255e
+      size: 663
+  features:
+    cmd: echo "TODO Phase 3 - build features"
+  train:
+    cmd: echo "TODO Phase 4 - train + log to MLflow"
+  evaluate:
+    cmd: echo "TODO Phase 4 - evaluate + register"

@@ -1,0 +1,20 @@
+{
+  "input_count": 300,
+  "output_count": 300,
+  "dropped_schema_errors": 0,
+  "dropped_duplicates": 0,
+  "dropped_length": 0,
+  "dropped_language": 0,
+  "per_ticker": {
+    "NVDA": 34,
+    "TSLA": 44,
+    "META": 47,
+    "AMZN": 47,
+    "GOOGL": 46,
+    "AAPL": 40,
+    "MSFT": 42
+  },
+  "per_source": {
+    "seed": 300
+  }
+}
