@@ -1,13 +1,13 @@
 {
-  "started_at": "2026-04-26T12:50:01.404963Z",
-  "finished_at": "2026-04-26T12:50:01.482591Z",
+  "started_at": "2026-04-26T16:38:07.312628Z",
+  "finished_at": "2026-04-26T16:38:07.475845Z",
   "sources": {
     "seed": 300,
     "newsapi": 0,
     "reddit": 0
   },
   "total_records": 300,
-  "duration_seconds": 0.078,
-  "throughput_rps": 3865.12,
+  "duration_seconds": 0.163,
+  "throughput_rps": 1838.16,
   "errors": []
 }

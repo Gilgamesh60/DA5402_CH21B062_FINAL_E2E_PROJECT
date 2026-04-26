@@ -1,6 +1,6 @@
 {
-  "run_id": "e969cbfe57ca437aa0f6bfee5ffb59c0",
-  "registered_version": "2",
+  "run_id": "5c9346c0fd9f4ee985619bd0276a74b9",
+  "registered_version": "3",
   "primary_metric": "macro_f1",
   "primary_value": 1.0,
   "acceptance_threshold": 0.75,

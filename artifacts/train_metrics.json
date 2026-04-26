@@ -1,7 +1,7 @@
 {
-  "run_id": "e969cbfe57ca437aa0f6bfee5ffb59c0",
-  "model_uri": "runs:/e969cbfe57ca437aa0f6bfee5ffb59c0/model",
-  "train_seconds": 0.0127,
+  "run_id": "5c9346c0fd9f4ee985619bd0276a74b9",
+  "model_uri": "runs:/5c9346c0fd9f4ee985619bd0276a74b9/model",
+  "train_seconds": 0.0129,
   "val_metrics": {
     "accuracy": 1.0,
     "macro_f1": 1.0,

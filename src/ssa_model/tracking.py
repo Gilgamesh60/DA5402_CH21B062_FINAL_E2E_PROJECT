@@ -27,7 +27,7 @@ from ssa_model.reproducibility import (
 
 logger = structlog.get_logger()
 
-DEFAULT_EXPERIMENT = "ssa-sentiment"
+DEFAULT_EXPERIMENT = "sentiment-classifier"
 
 
 def configure_mlflow(tracking_uri: str | None = None, experiment: str = DEFAULT_EXPERIMENT) -> None:

@@ -1,6 +1,6 @@
 # EDA summary
 
-Generated: 2026-04-26T12:50:04.900563+00:00
+Generated: 2026-04-26T16:38:11.829611+00:00
 Sample size: 300
 
 ## Numeric features
