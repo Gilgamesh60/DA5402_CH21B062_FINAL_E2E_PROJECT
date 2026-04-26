@@ -64,7 +64,21 @@ Delivered:
 Problems faced:
 - `dvc repro` initially failed with "command not found: python" because DVC inherits the shell's PATH, and zsh on macOS doesn't alias `python` to `python3`. Fixed by switching the stage commands to `python3` and activating the venv before `dvc repro`.
 - Pandas serialises NaN values from parquet where Python expected `None`; added an explicit NaN→None normalisation step in `validation.run()` before handing rows to Pydantic.
-## Phase 3 — Feature engineering package — ⏳ pending
+## Phase 3 — Feature engineering package — ✅ complete
+
+Delivered:
+- `ssa_features` package bumped to `0.2.0` — independent version stamped on every saved vectorizer so mismatches are detectable
+- `ssa_features.cleaning` — deterministic, stateless text cleaner (URLs, mentions, cashtags, unicode normalisation, whitespace)
+- `ssa_features.vectorizer.TextFeaturizer` — sklearn-compatible wrapper around TF-IDF with `fit/transform/fit_transform/save/load/metadata/feature_names`
+- `ssa_features.pipeline` — entry point that reads validated records, stratified-splits train/val/test, fits on train only (no leakage), transforms all splits, saves cleaned parquet + fitted vectorizer + report
+- `dvc.yaml` gains the real `features` stage with deps, params, outs (3 parquets + joblib), and metrics (feature report)
+- DVC DAG now branches cleanly: `ingest → validate → {eda_baselines, features}`
+- 28 unit tests passing (15 new across cleaning + vectorizer + pipeline), coverage 74%
+- Live seed run: 300 labelled → 209/30/61 split, vocab 467, class balance preserved within 2%
+
+Problems faced:
+- `train_test_split` throws on tiny classes; added a fallback to non-stratified split when any class has < 2 samples. Not hit by the current seed corpus but future-proofs live runs.
+- Initially put `text_clean` inside the vectorizer so serving could pass raw text, but the persisted splits then didn't carry the cleaned version. Moved cleaning to happen once in `pipeline.run()` and stored `text_clean` as a first-class column in the parquets so Phase 4 training, Phase 6 drift detection, and Phase 11 test fixtures all look at identical inputs.
 ## Phase 4 — MLflow + baseline training — ⏳ pending
 ## Phase 5 — FastAPI gateway + model server — ⏳ pending
 ## Phase 6 — Prometheus + Grafana + alerts — ⏳ pending

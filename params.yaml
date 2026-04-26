@@ -32,12 +32,16 @@ features:
   text_cleaning:
     lowercase: true
     remove_urls: true
-    remove_tickers: false
+    preserve_cashtags: true
+    remove_mentions: true
   aggregation_window_minutes: 60
   vectorizer:
     type: tfidf
     max_features: 20000
     ngram_range: [1, 2]
+    min_df: 2
+    max_df: 0.95
+    sublinear_tf: true
 
 training:
   model_type: logistic_regression  # baseline; swap to finbert in Phase 10

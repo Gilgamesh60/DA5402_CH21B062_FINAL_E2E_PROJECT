@@ -1,0 +1,83 @@
+{
+  "generated_at": "2026-04-26T15:26:39.177329+00:00",
+  "feature_package_version": "0.2.0",
+  "splits": {
+    "train": 209,
+    "val": 30,
+    "test": 61
+  },
+  "class_balance": {
+    "train": {
+      "positive": 0.3684,
+      "neutral": 0.3158,
+      "negative": 0.3158
+    },
+    "val": {
+      "positive": 0.3667,
+      "neutral": 0.3333,
+      "negative": 0.3
+    },
+    "test": {
+      "positive": 0.3607,
+      "negative": 0.3279,
+      "neutral": 0.3115
+    }
+  },
+  "featurizer": {
+    "feature_package_version": "0.2.0",
+    "vocab_size": 467,
+    "vectorizer": {
+      "max_features": 20000,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "min_df": 2,
+      "max_df": 0.95,
+      "sublinear_tf": true
+    },
+    "cleaning": {
+      "lowercase": true,
+      "remove_urls": true,
+      "preserve_cashtags": true,
+      "remove_mentions": true,
+      "normalize_unicode": true,
+      "collapse_whitespace": true
+    }
+  },
+  "top_terms_sample": [
+    "10",
+    "10 contents",
+    "30",
+    "30 day",
+    "aapl",
+    "aapl accelerate",
+    "aapl announces",
+    "aapl files",
+    "aapl grows",
+    "aapl reports",
+    "aapl to",
+    "aapl unveils",
+    "aapl warns",
+    "about",
+    "about future",
+    "about slowing",
+    "accelerate",
+    "accelerate as",
+    "after",
+    "after disappointing"
+  ],
+  "config": {
+    "test_size": 0.2,
+    "val_size": 0.1,
+    "random_seed": 42,
+    "cleaning": {
+      "lowercase": true,
+      "remove_urls": true,
+      "preserve_cashtags": true,
+      "remove_mentions": true,
+      "normalize_unicode": true,
+      "collapse_whitespace": true
+    }
+  }
+}

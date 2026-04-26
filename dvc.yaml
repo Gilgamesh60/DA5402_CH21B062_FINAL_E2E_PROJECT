@@ -40,8 +40,23 @@ stages:
           cache: false
 
   features:
-    cmd: echo "TODO Phase 3 - build features"
-    # Stubbed; Phase 3 fills in.
+    cmd: python3 -m ssa_features.pipeline
+    deps:
+      - data/interim/validated.parquet
+      - src/ssa_features
+    params:
+      - features
+      - training.test_size
+      - training.val_size
+      - training.random_seed
+    outs:
+      - data/processed/train.parquet
+      - data/processed/val.parquet
+      - data/processed/test.parquet
+      - artifacts/vectorizer.joblib
+    metrics:
+      - artifacts/feature_report.json:
+          cache: false
 
   train:
     cmd: echo "TODO Phase 4 - train + log to MLflow"
