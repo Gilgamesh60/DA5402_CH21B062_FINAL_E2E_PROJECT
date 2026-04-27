@@ -1,9 +1,11 @@
 """Tiny Prometheus textfile exposer.
 
-Serves whatever lives in `/metrics/drift_metrics.prom` at `/metrics`.
-If the file is missing, serves an empty body (still 200) — Prometheus
-will continue scraping and pick up the file once the first drift job
-has written it.
+Serves the concatenation of every `*.prom` file in /metrics/ at
+`/metrics`. Currently collects:
+  - drift_metrics.prom      (from ssa_monitoring.drift)
+  - feedback_metrics.prom   (from ssa_monitoring.feedback_metrics)
+
+If a file is missing the exporter continues serving whatever is present.
 """
 
 from __future__ import annotations
@@ -12,14 +14,29 @@ import http.server
 import pathlib
 import socketserver
 
-METRICS_FILE = pathlib.Path("/metrics/drift_metrics.prom")
+METRICS_DIR = pathlib.Path("/metrics")
 PORT = 9101
+
+
+def _load_all() -> bytes:
+    parts: list[bytes] = []
+    if METRICS_DIR.exists():
+        for f in sorted(METRICS_DIR.glob("*.prom")):
+            try:
+                body = f.read_bytes()
+                if body:
+                    parts.append(body)
+                    if not body.endswith(b"\n"):
+                        parts.append(b"\n")
+            except OSError:
+                continue
+    return b"".join(parts)
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802 — BaseHTTPRequestHandler interface
         if self.path == "/metrics":
-            body = METRICS_FILE.read_bytes() if METRICS_FILE.exists() else b""
+            body = _load_all()
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; version=0.0.4")
             self.send_header("Content-Length", str(len(body)))

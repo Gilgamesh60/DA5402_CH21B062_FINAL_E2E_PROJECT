@@ -195,7 +195,30 @@ Delivered:
 
 Problems faced:
 - No new blockers. All three workflows syntactically valid; rollback flow proven against the live MLflow server.
-## Phase 9 — Feedback loop + retraining — ⏳ pending
+## Phase 9 — Feedback loop + retraining — ✅ complete
+
+Delivered:
+- `predictions` Postgres table (+migration) so `/feedback` can join back to the predicted label for real-world accuracy
+- `PredictionRepo` in the API writes every `/predict` outcome; `/feedback` auto-fills `predicted_label` via join
+- `ssa_monitoring.feedback_metrics` — aggregates feedback into `feedback_total`, `feedback_agreement_rate`, `feedback_accuracy_by_model{version}`, `feedback_last_run_timestamp`
+- Drift-exporter upgraded to concatenate every `*.prom` file in `/metrics/` so drift + feedback metrics coexist
+- Two new Airflow DAGs:
+  - `ssa_feedback_metrics` — hourly aggregation of feedback → Prometheus exposition file
+  - `ssa_retraining` — manual/webhook-triggered refresh → features → train → evaluate → auto-promote based on metric threshold
+- Alertmanager service added to compose, routes drift alerts to the Airflow REST API webhook at `/api/v1/dags/ssa_retraining/dagRuns`
+- Prometheus config updated to notify Alertmanager
+
+Live verification:
+- Prediction → Postgres log → feedback join → aggregation → Prometheus metric (`feedback_total 2, agreement_rate 1.0`) all visible
+- Airflow UI shows both new DAGs
+- Retraining DAG ran end-to-end successfully: v3 registered in Staging (v1 still Production because equal-score guard blocks promotion)
+- Alertmanager routing drift alerts per config — `FeatureDriftNumeric` visible as active alerts
+- All 11 compose services healthy (added `alertmanager`)
+
+Problems faced:
+- Airflow image lazy-imports `email-validator` through Pydantic 2.x networks module when pydantic-settings touches URL types; train task crashed on the first run. Added `email-validator>=2.0` to `_PIP_ADDITIONAL_REQUIREMENTS` and recreated the Airflow containers (pip installs are baked in at boot).
+- Postgres volume persisted from Phase 1 so the `predictions` table didn't exist on existing deployments. Wrote `docker/postgres/migrations/001_phase9_predictions.sql` and applied via `psql` to the running container.
+- Feedback aggregation needs Postgres access via the compose network, not from host (Postgres isn't port-mapped). Airflow + drift-exporter both reach it by service name; local dev runs the aggregator inside the scheduler container.
 ## Phase 10 — FinBERT + quantization — ⏳ pending
 ## Phase 11 — Tests + report — ⏳ pending
 ## Phase 12 — Security hardening — ⏳ pending

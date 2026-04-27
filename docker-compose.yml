@@ -127,7 +127,7 @@ services:
       AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
       AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
       PYTHONPATH: /opt/airflow/repo/src
-      _PIP_ADDITIONAL_REQUIREMENTS: "pandas>=2.0 pyarrow>=14 pydantic>=2.5 pyyaml>=6.0 structlog>=24.1 scikit-learn>=1.4 joblib>=1.3 numpy>=1.26 scipy>=1.12 matplotlib>=3.8 mlflow>=3.0"
+      _PIP_ADDITIONAL_REQUIREMENTS: "pandas>=2.0 pyarrow>=14 pydantic>=2.5 email-validator>=2.0 pyyaml>=6.0 structlog>=24.1 scikit-learn>=1.4 joblib>=1.3 numpy>=1.26 scipy>=1.12 matplotlib>=3.8 mlflow>=3.0 psycopg2-binary>=2.9"
       _AIRFLOW_DB_MIGRATE: "true"
       _AIRFLOW_WWW_USER_CREATE: "true"
       _AIRFLOW_WWW_USER_USERNAME: admin
@@ -157,7 +157,7 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
       PYTHONPATH: /opt/airflow/repo/src
-      _PIP_ADDITIONAL_REQUIREMENTS: "pandas>=2.0 pyarrow>=14 pydantic>=2.5 pyyaml>=6.0 structlog>=24.1 scikit-learn>=1.4 joblib>=1.3 numpy>=1.26 scipy>=1.12 matplotlib>=3.8 mlflow>=3.0"
+      _PIP_ADDITIONAL_REQUIREMENTS: "pandas>=2.0 pyarrow>=14 pydantic>=2.5 email-validator>=2.0 pyyaml>=6.0 structlog>=24.1 scikit-learn>=1.4 joblib>=1.3 numpy>=1.26 scipy>=1.12 matplotlib>=3.8 mlflow>=3.0 psycopg2-binary>=2.9"
     command: webserver
     volumes:
       - airflow-logs:/opt/airflow/logs
@@ -185,7 +185,7 @@ services:
       AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
       PYTHONPATH: /opt/airflow/repo/src
-      _PIP_ADDITIONAL_REQUIREMENTS: "pandas>=2.0 pyarrow>=14 pydantic>=2.5 pyyaml>=6.0 structlog>=24.1 scikit-learn>=1.4 joblib>=1.3 numpy>=1.26 scipy>=1.12 matplotlib>=3.8 mlflow>=3.0"
+      _PIP_ADDITIONAL_REQUIREMENTS: "pandas>=2.0 pyarrow>=14 pydantic>=2.5 email-validator>=2.0 pyyaml>=6.0 structlog>=24.1 scikit-learn>=1.4 joblib>=1.3 numpy>=1.26 scipy>=1.12 matplotlib>=3.8 mlflow>=3.0 psycopg2-binary>=2.9"
     command: scheduler
     volumes:
       - airflow-logs:/opt/airflow/logs
@@ -212,6 +212,27 @@ services:
       - ./artifacts:/metrics:ro
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:9101/health').read()\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
+  # Alertmanager: receives alerts from Prometheus, routes drift alerts
+  # to the Airflow retraining DAG via webhook.
+  # -----------------------------------------------------------------
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9093/-/healthy"]
       interval: 10s
       timeout: 5s
       retries: 5

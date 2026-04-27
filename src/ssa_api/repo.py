@@ -1,6 +1,8 @@
 """Data access for the API gateway.
 
 - FeedbackRepo writes ground-truth labels to Postgres.
+- PredictionRepo writes prediction events so /feedback can join back to
+  the predicted label and we can compute real-world accuracy.
 - RecordRepo reads recent text records for a ticker. Phase 5 reads from
   the validated parquet; Phase 9 (live data) switches to a proper store.
 """
@@ -17,6 +19,53 @@ import psycopg2
 import structlog
 
 logger = structlog.get_logger()
+
+
+# ---------------------------------------------------------------------------
+# Predictions
+# ---------------------------------------------------------------------------
+class PredictionRepo:
+    def __init__(self, dsn: str) -> None:
+        self.dsn = dsn
+
+    def insert(
+        self,
+        prediction_request_id: UUID | str,
+        ticker: str,
+        predicted_label: str,
+        confidence: float,
+        model_version: str | None,
+        model_stage: str | None,
+        sample_size: int | None,
+        lookback_hours: int | None,
+        latency_ms: int | None,
+    ) -> None:
+        sql = (
+            "INSERT INTO predictions "
+            "(prediction_request_id, ticker, predicted_label, confidence, "
+            " model_version, model_stage, sample_size, lookback_hours, latency_ms) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) "
+            "ON CONFLICT (prediction_request_id) DO NOTHING"
+        )
+        params = (
+            str(prediction_request_id),
+            ticker,
+            predicted_label,
+            float(confidence),
+            model_version,
+            model_stage,
+            sample_size,
+            lookback_hours,
+            latency_ms,
+        )
+        try:
+            with psycopg2.connect(self.dsn) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(sql, params)
+                conn.commit()
+        except Exception as e:
+            # Never let logging-side failures kill a prediction request.
+            logger.warning("prediction_log_failed", error=str(e))
 
 
 # ---------------------------------------------------------------------------

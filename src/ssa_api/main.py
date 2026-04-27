@@ -36,7 +36,7 @@ from ssa_api.inference import (
 )
 from ssa_api.middleware import RequestContextMiddleware
 from ssa_api.model_client import ModelClient
-from ssa_api.repo import FeedbackRepo, RecordRepo
+from ssa_api.repo import FeedbackRepo, PredictionRepo, RecordRepo
 from ssa_api.schemas import (
     BatchItem,
     BatchPredictRequest,
@@ -84,6 +84,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.model_client = ModelClient(settings.model_server_url)
     app.state.records = RecordRepo()
     app.state.feedback = FeedbackRepo(settings.postgres_dsn)
+    app.state.predictions = PredictionRepo(settings.postgres_dsn)
     mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
     app.state.mlflow = MlflowClient(tracking_uri=settings.mlflow_tracking_uri)
     logger.info(
@@ -163,6 +164,10 @@ def get_records(request: Request) -> RecordRepo:
 
 def get_feedback(request: Request) -> FeedbackRepo:
     return request.app.state.feedback
+
+
+def get_predictions(request: Request) -> PredictionRepo:
+    return request.app.state.predictions
 
 
 def get_mlflow(request: Request) -> MlflowClient:
@@ -360,6 +365,7 @@ async def predict(
     records: RecordRepo = Depends(get_records),
     client: ModelClient = Depends(get_model_client),
     mlf: MlflowClient = Depends(get_mlflow),
+    predictions_repo: PredictionRepo = Depends(get_predictions),
 ) -> PredictResponse:
     t0 = time.perf_counter()
     ref = _current_production_ref(mlf)
@@ -377,6 +383,19 @@ async def predict(
     resp.model = ref
     resp.request_id = request.state.request_id
     resp.latency_ms = int((time.perf_counter() - t0) * 1000)
+
+    # Log for feedback-join in Phase 9 retraining
+    predictions_repo.insert(
+        prediction_request_id=resp.request_id,
+        ticker=resp.ticker,
+        predicted_label=resp.sentiment.value,
+        confidence=resp.confidence,
+        model_version=ref.version,
+        model_stage=ref.stage,
+        sample_size=resp.sample_size,
+        lookback_hours=resp.lookback_hours,
+        latency_ms=resp.latency_ms,
+    )
     return resp
 
 
@@ -430,12 +449,32 @@ async def feedback(
     body: FeedbackRequest,
     repo: FeedbackRepo = Depends(get_feedback),
 ) -> FeedbackResponse:
+    # Look up the predicted label so real-world accuracy can be computed
+    # without a follow-up join every time. Best-effort — if the lookup
+    # fails (e.g. prediction came from before Phase 9), we still accept
+    # the feedback and leave predicted_label NULL.
+    predicted = None
+    try:
+        import psycopg2
+
+        with psycopg2.connect(settings.postgres_dsn) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT predicted_label FROM predictions WHERE prediction_request_id = %s",
+                    (str(body.prediction_request_id),),
+                )
+                row = cur.fetchone()
+                if row:
+                    predicted = row[0]
+    except Exception as e:
+        logger.warning("feedback_join_failed", error=str(e))
+
     try:
         feedback_id = repo.insert(
             ticker=body.ticker,
             prediction_request_id=body.prediction_request_id,
             true_label=body.true_label.value,
-            predicted_label=None,  # optional join in Phase 9
+            predicted_label=predicted,
             user_comment=body.user_comment,
         )
     except Exception as e:
