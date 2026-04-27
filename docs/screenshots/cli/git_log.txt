@@ -1,3 +1,4 @@
+47af96e docs: walkthrough with 16 UI screenshots + CLI proofs
 d3bfb27 feat(tests): Phase 11 - contract + e2e tests, acceptance verifier, report
 d8f3b3b feat(mlops): Phase 9 - feedback loop, retraining DAG, Alertmanager
 6e71362 feat(ci): Phase 8 - CI/CD workflows + rollback automation

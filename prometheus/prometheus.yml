@@ -11,6 +11,7 @@ rule_files:
   - /etc/prometheus/alerts.yml
 
 scrape_configs:
+  # --- Self + native Prometheus-exposition services ---
   - job_name: prometheus
     static_configs:
       - targets: ["localhost:9090"]
@@ -26,6 +27,46 @@ scrape_configs:
     static_configs:
       - targets: ["drift-exporter:9101"]
 
-  # model-server doesn't expose /metrics natively (mlflow models serve).
-  # Liveness is inferred via the api /ready probe and the `up` metric
-  # from the `api` job.
+  - job_name: blackbox
+    static_configs:
+      - targets: ["blackbox-exporter:9115"]
+
+  # --- HTTP up-probes for every service that doesn't export
+  # Prometheus text natively. Emits `probe_success{instance=...}`
+  # so every component has a visible up/down signal. ---
+  - job_name: probe_http
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://mlflow:5000/health
+          - http://airflow-webserver:8080/health
+          - http://grafana:3000/api/health
+          - http://alertmanager:9093/-/healthy
+          - http://model-server:5001/health
+          - http://drift-exporter:9101/health
+          - http://frontend:80/
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # --- TCP probe for Postgres (no HTTP surface) ---
+  - job_name: probe_tcp
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+      - targets:
+          - postgres:5432
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

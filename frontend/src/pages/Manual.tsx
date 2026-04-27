@@ -37,6 +37,17 @@ export default function Manual() {
             feedback buttons. This data is logged so the model can be retrained
             on real mistakes over time.
           </p>
+          <figure className="mt-4 rounded-md border border-slate-200 overflow-hidden bg-slate-50">
+            <img
+              src="/manual-analyze.png"
+              alt="Screenshot of the Analyze screen with a sample prediction for AAPL"
+              className="w-full block"
+              loading="lazy"
+            />
+            <figcaption className="text-xs text-slate-500 p-2 border-t border-slate-200">
+              Example result with contributing snippets enabled.
+            </figcaption>
+          </figure>
         </section>
 
         <section className="mb-8">
@@ -63,6 +74,14 @@ export default function Manual() {
             at the bottom of the page show which services Prometheus is
             successfully monitoring right now.
           </p>
+          <figure className="mt-4 rounded-md border border-slate-200 overflow-hidden bg-slate-50">
+            <img
+              src="/manual-pipelines.png"
+              alt="Screenshot of the Pipelines screen"
+              className="w-full block"
+              loading="lazy"
+            />
+          </figure>
         </section>
 
         <section className="mb-8">
@@ -77,6 +96,14 @@ export default function Manual() {
             version to promote it back. A model-server restart is required for
             the change to take effect.
           </p>
+          <figure className="mt-4 rounded-md border border-slate-200 overflow-hidden bg-slate-50">
+            <img
+              src="/manual-models.png"
+              alt="Screenshot of the Models screen"
+              className="w-full block"
+              loading="lazy"
+            />
+          </figure>
         </section>
 
         <section className="mb-8">

@@ -1,3 +1,12 @@
 api             http://api:8000/metrics                            up
+blackbox        http://blackbox-exporter:9115/metrics              up
 drift           http://drift-exporter:9101/metrics                 up
+probe_http      http://blackbox-exporter:9115/probe?module=http_2xx&target=http%3A%2F%2Fmlflow%3A5000%2Fhealth up
+probe_http      http://blackbox-exporter:9115/probe?module=http_2xx&target=http%3A%2F%2Fairflow-webserver%3A8080%2Fhealth up
+probe_http      http://blackbox-exporter:9115/probe?module=http_2xx&target=http%3A%2F%2Fgrafana%3A3000%2Fapi%2Fhealth up
+probe_http      http://blackbox-exporter:9115/probe?module=http_2xx&target=http%3A%2F%2Falertmanager%3A9093%2F-%2Fhealthy up
+probe_http      http://blackbox-exporter:9115/probe?module=http_2xx&target=http%3A%2F%2Fmodel-server%3A5001%2Fhealth up
+probe_http      http://blackbox-exporter:9115/probe?module=http_2xx&target=http%3A%2F%2Fdrift-exporter%3A9101%2Fhealth up
+probe_http      http://blackbox-exporter:9115/probe?module=http_2xx&target=http%3A%2F%2Ffrontend%3A80%2F up
+probe_tcp       http://blackbox-exporter:9115/probe?module=tcp_connect&target=postgres%3A5432 up
 prometheus      http://localhost:9090/metrics                      up

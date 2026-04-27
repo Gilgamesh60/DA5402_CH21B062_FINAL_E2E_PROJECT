@@ -249,13 +249,22 @@ async def model_info(mlf: MlflowClient = Depends(get_mlflow)) -> ModelInfo:
     mv = mlf.get_model_version(name=ref.name, version=ref.version)
     run = mlf.get_run(mv.run_id) if mv.run_id else None
     tags = run.data.tags if run else {}
+    params = run.data.params if run else {}
+    # Try both tag + param names for the DVC data hash (we stamp it via
+    # the reproducibility context artifact which gets uploaded, but we
+    # also now log it directly as a param so it's cheap to surface here).
+    data_hash = (
+        tags.get("dvc.data_hash")
+        or params.get("dvc_data_hash")
+        or params.get("data_hash")
+    )
     return ModelInfo(
         name=ref.name,
         version=ref.version,
         stage=ref.stage,
         git_commit_sha=tags.get("git.commit_sha"),
         mlflow_run_id=mv.run_id,
-        data_hash=None,
+        data_hash=data_hash,
         trained_at=datetime.fromtimestamp(mv.creation_timestamp / 1000)
         if mv.creation_timestamp
         else None,

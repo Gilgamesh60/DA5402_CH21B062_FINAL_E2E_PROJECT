@@ -7,6 +7,13 @@ set -e
 OUT=docs/screenshots/cli
 mkdir -p "$OUT"
 
+echo "Warming API so proofs show steady-state latency (not cold-start)…"
+for i in 1 2 3 4 5 6 7 8; do
+  curl -sS -m 10 -X POST http://localhost:8000/predict \
+    -H "Content-Type: application/json" \
+    -d '{"ticker": "AAPL"}' > /dev/null || true
+done
+
 echo "Capturing CLI proofs…"
 
 # docker ps
@@ -66,8 +73,8 @@ docker exec stock-sentiment-mlops-postgres-1 \
   > "$OUT/postgres_feedback.txt" 2>&1
 echo "  ✓ postgres_feedback.txt"
 
-# Test report summary
-head -40 docs/test-report.md > "$OUT/test_report_head.txt"
+# Test report summary — include acceptance criteria section
+head -100 docs/test-report.md > "$OUT/test_report_head.txt"
 echo "  ✓ test_report_head.txt"
 
 echo ""

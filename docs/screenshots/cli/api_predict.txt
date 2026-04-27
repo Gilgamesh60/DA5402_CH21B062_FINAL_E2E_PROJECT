@@ -11,10 +11,10 @@
     "lookback_hours": 24,
     "model": {
         "name": "stock-sentiment",
-        "version": "1",
+        "version": "5",
         "stage": "Production"
     },
     "explanations": [],
-    "request_id": "c9e44fd1-4174-4d35-94ba-fdd098f0e112",
-    "latency_ms": 3108
+    "request_id": "b531fff6-1363-4ec6-85b8-bf241758fcfa",
+    "latency_ms": 85
 }

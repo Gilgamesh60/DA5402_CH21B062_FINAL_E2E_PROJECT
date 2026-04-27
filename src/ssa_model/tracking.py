@@ -19,6 +19,7 @@ import mlflow
 import structlog
 
 from ssa_model.reproducibility import (
+    dvc_data_hash,
     environment_snapshot,
     full_context,
     git_commit_sha,
@@ -52,6 +53,7 @@ def mlflow_run(run_name: str, tags: dict[str, str] | None = None) -> Iterator[ml
     base_tags = {
         "git.commit_sha": git_commit_sha(),
         "git.dirty": str(git_dirty()).lower(),
+        "dvc.data_hash": dvc_data_hash(),
     }
     if tags:
         base_tags.update(tags)

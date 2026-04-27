@@ -1,9 +1,9 @@
 {
     "name": "stock-sentiment",
-    "version": "1",
+    "version": "5",
     "stage": "Production",
-    "git_commit_sha": "cad311d2caa1a0b9246678632aaef8a59bacc750",
-    "mlflow_run_id": "b17a91b3407648008b54a64e85ce9eaa",
-    "data_hash": null,
-    "trained_at": "2026-04-26T17:28:23.079000"
+    "git_commit_sha": "47af96ea0910b85d9c0841d4247d88b3ec402f7d",
+    "mlflow_run_id": "bcd649984faf43efaecbc92746e61a5e",
+    "data_hash": "c29203c0347008d8722f12068e434f8e",
+    "trained_at": "2026-04-27T18:20:45.455000"
 }

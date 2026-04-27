@@ -1,0 +1,25 @@
+modules:
+  # Checks any HTTP endpoint returns 200 — used to tell Prometheus
+  # whether MLflow/Airflow/Grafana/Alertmanager/Postgres/Frontend are alive
+  # when those services don't natively speak Prometheus exposition.
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200]
+      method: GET
+      preferred_ip_protocol: ip4
+
+  # Permissive variant for endpoints that 302 or 401 when healthy.
+  http_any_2xx_3xx:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200, 301, 302, 401, 403]
+      method: GET
+      preferred_ip_protocol: ip4
+
+  # TCP probe — used for Postgres (no HTTP surface).
+  tcp_connect:
+    prober: tcp
+    timeout: 5s

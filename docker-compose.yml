@@ -219,6 +219,27 @@ services:
       - ssa-net
 
   # -----------------------------------------------------------------
+  # Blackbox exporter: turns HTTP/TCP probes into Prometheus metrics,
+  # so every service gets an `up` signal even if it doesn't expose
+  # /metrics natively (MLflow, Airflow, Grafana, Alertmanager, Postgres).
+  # -----------------------------------------------------------------
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.25.0
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    command:
+      - --config.file=/etc/blackbox_exporter/config.yml
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9115/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssa-net
+
+  # -----------------------------------------------------------------
   # Alertmanager: receives alerts from Prometheus, routes drift alerts
   # to the Airflow retraining DAG via webhook.
   # -----------------------------------------------------------------

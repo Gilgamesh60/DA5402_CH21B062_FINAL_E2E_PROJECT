@@ -73,7 +73,7 @@ def shot(page: Page, name: str, full_page: bool = True) -> None:
 def goto(page: Page, url: str, wait_for: str | None = None) -> None:
     # Many SPAs (MLflow, Grafana) never reach `networkidle` because they poll.
     # `domcontentloaded` + an explicit selector wait + settle is more reliable.
-    page.goto(url, wait_until="domcontentloaded", timeout=20000)
+    page.goto(url, wait_until="domcontentloaded", timeout=45000)
     if wait_for:
         try:
             page.wait_for_selector(wait_for, timeout=10000)

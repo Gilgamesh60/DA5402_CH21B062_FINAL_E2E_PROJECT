@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-27T16:36:13.315165+00:00",
+  "generated_at": "2026-04-27T18:53:59.821576+00:00",
   "all_passed": true,
   "checks": {
     "predict_p95_latency": {
       "target_ms": 200,
-      "actual_ms": 48.3,
+      "actual_ms": 192.9,
       "passed": true
     },
     "predict_error_rate": {
@@ -28,9 +28,9 @@
       "successful": 30,
       "errors": 0,
       "error_rate_pct": 0.0,
-      "p50_ms": 23.8,
-      "p95_ms": 48.3,
-      "mean_ms": 27.9
+      "p50_ms": 37.2,
+      "p95_ms": 192.9,
+      "mean_ms": 52.3
     }
   }
 }
