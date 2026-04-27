@@ -148,10 +148,19 @@ def capture_airflow(page: Page) -> None:
         page.wait_for_url(f"{AIRFLOW}/home", timeout=15000)
     except Exception as e:
         print(f"    airflow login fell back: {e}")
-        # Try the /home URL directly — auth might already be set
         goto(page, f"{AIRFLOW}/home")
     time.sleep(3)
     shot(page, "10_airflow_dags")
+
+    # Capture the ssa_ingestion DAG grid view — shows actual task runs
+    # with green/red squares per run, which is the "console to track
+    # errors, failures, and successful runs" the rubric asks for.
+    try:
+        goto(page, f"{AIRFLOW}/dags/ssa_ingestion/grid")
+        time.sleep(5)
+        shot(page, "10b_airflow_dag_grid")
+    except Exception as e:
+        print(f"    airflow grid capture failed: {e}")
 
 
 def capture_prometheus(page: Page) -> None:

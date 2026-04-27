@@ -181,8 +181,15 @@ Four DAGs currently defined:
 - `ssa_feedback_metrics` — aggregate /feedback hourly (scheduled)
 - `ssa_retraining` — refresh features → train → evaluate → auto-promote (manual + webhook-triggered; **verified successful run**)
 
+### Grid view — task-level run history
+
+![Airflow grid view of ssa_ingestion](screenshots/10b_airflow_dag_grid.png)
+
+Airflow's grid view is the rubric's "console to track errors, failures, and successful runs" — every column is a run, every cell is a task, colour-coded by state. Two successful `ssa_ingestion` runs are visible (all three tasks green).
+
 **Rubric coverage**
 - **Data Engineering [2]** — "Should use Airflow or Spark" — ✓
+- **ML Pipeline Visualization [4]** — "console to track errors, failures, and successful runs" — ✓
 - MLOps-guidelines mandate: automated retraining pipeline
 
 ---
@@ -383,11 +390,96 @@ $ head -60 docs/test-report.md
 
 See [`screenshots/cli/test_report_head.txt`](screenshots/cli/test_report_head.txt). Full report at [`test-report.md`](test-report.md).
 
-### 17.6 EDA notebook
+### 17.6 Pipeline performance (Data Engineering [2])
+
+Rubric asks "What is the throughput and speed of the data engineering pipeline?" — measured on the seed corpus (300 records, Colima aarch64, Python 3.14):
+
+| Stage | Records | Duration | Throughput |
+|---|---:|---:|---:|
+| ingest | 300 | 0.08 s | **3,688 rec/s** |
+| validate | 300 → 300 | < 0.05 s | ~6,000 rec/s |
+| eda_baselines | 300 | < 0.1 s | — |
+| features (split + fit + transform) | 300 → 209 / 30 / 61 | < 0.2 s | — |
+
+Raw numbers from [`screenshots/cli/ingestion_report.txt`](screenshots/cli/ingestion_report.txt) and [`screenshots/cli/validation_report.txt`](screenshots/cli/validation_report.txt). Full performance analysis in [`docs/performance.md`](performance.md).
+
+At seed scale, pandas parquet serialisation dominates. At live scale, the pipeline becomes I/O-bound on external API latency — the fix is `ThreadPoolExecutor` on source fetches (trivially parallel HTTP).
+
+### 17.7 EDA notebook
 
 Exploratory data analysis with plots for class balance, per-ticker volume, text-length distribution, and missing-value profile, plus a sanity check against the drift baselines.
 
 See [`notebooks/eda.ipynb`](../notebooks/eda.ipynb) — executed with outputs baked in.
+
+### 17.8 MLproject — identical dev/test environments (Packaging [4])
+
+Rubric asks "Have you used MLprojects to maintain identical dev and test environments?" The `MLproject` file at repo root defines 5 entry points (ingest / features / train / evaluate / main) bound to `python_env.yaml`:
+
+```yaml
+name: stock-sentiment-mlops
+python_env: python_env.yaml
+entry_points:
+  ingest:    { command: "python -m ssa_ingestion.pipeline" }
+  features:  { command: "python -m ssa_features.pipeline" }
+  train:
+    parameters:
+      model_type: { type: string, default: logistic_regression }
+      data_path:  { type: path,   default: data/processed/features.parquet }
+    command: "python -m ssa_model.train --model-type {model_type} --data-path {data_path}"
+  evaluate:
+    parameters:
+      run_id: { type: string }
+    command: "python -m ssa_model.evaluate --run-id {run_id}"
+  main:      { command: "python -m ssa_model.train" }
+```
+
+Verbatim copies of both files are in [`screenshots/cli/MLproject.txt`](screenshots/cli/MLproject.txt) and [`screenshots/cli/python_env.yaml.txt`](screenshots/cli/python_env.yaml.txt).
+
+### 17.9 Logging + exception handling (Implementation [2])
+
+**Structured JSON logs** — every request emits a `request` event with a UUID so a trace can be stitched across services:
+
+```json
+{"event": "request", "request_id": "9fd1cc38-...", "method": "POST",
+ "path": "/predict", "status": 200, "latency_ms": 85}
+```
+
+Live sample captured in [`screenshots/cli/api_logs_sample.txt`](screenshots/cli/api_logs_sample.txt).
+
+**Error response** — when input violates the schema the API returns a typed error payload (not a stacktrace), proving exception handling is routed through a dedicated handler:
+
+```
+$ curl -X POST http://localhost:8000/predict \
+    -H "Content-Type: application/json" \
+    -d '{"ticker": "lowercase!!"}'
+```
+
+```json
+{
+  "error": "validation failed",
+  "code": "INVALID_TICKER",
+  "request_id": "d9072d30-fec6-473e-802e-0cb5d5e311e6",
+  "details": { "errors": [{"type":"string_too_long","loc":["body","ticker"],...}] }
+}
+```
+
+Live response captured in [`screenshots/cli/api_error_response.txt`](screenshots/cli/api_error_response.txt).
+
+Every endpoint wraps handlers with a top-level exception handler that logs with context and returns a stable error code — never a raw stack trace.
+
+### 17.10 GitHub Actions CI workflows (SCM & CI [2])
+
+Three workflow files in `.github/workflows/`:
+
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| `ci.yml` | push + PR to `main` | Python matrix (3.10, 3.11): ruff, black, isort, mypy, pytest with coverage; frontend TS typecheck + Vite build; `docker compose config --quiet` and `docker compose build --parallel` |
+| `dvc.yml` | push/PR touching data or feature code | Runs `dvc repro ingest validate eda_baselines features drift`, validates expected outputs exist, exports `dvc-dag.dot` and all reports as build artifacts |
+| `rollback.yml` | manual `workflow_dispatch` | Promotes a target model version to Production with dry-run guard + summary markdown |
+
+Verbatim workflow files in [`screenshots/cli/github_workflow_ci.yml.txt`](screenshots/cli/github_workflow_ci.yml.txt), [`screenshots/cli/github_workflow_dvc.yml.txt`](screenshots/cli/github_workflow_dvc.yml.txt), [`screenshots/cli/github_workflow_rollback.yml.txt`](screenshots/cli/github_workflow_rollback.yml.txt).
+
+The DVC pipeline itself — the actual CI artefact the rubric asks for — is validated every run of `dvc repro`, which is captured in [§17.1](#171-git--dvc--git-lfs-scm--ci-2).
 
 ---
 
@@ -396,15 +488,15 @@ See [`notebooks/eda.ipynb`](../notebooks/eda.ipynb) — executed with outputs ba
 | Rubric item | Points | Primary evidence in this doc |
 |---|---:|---|
 | UI/UX | 6 | §2, §3, §4, §5, §6 |
-| ML Pipeline Visualization | 4 | §3, §10, §11 |
+| ML Pipeline Visualization | 4 | §3, §10 (grid view), §11, §17.6 (speed/throughput) |
 | Design Principle | 2 | §7 (Swagger), docs/HLD.md, docs/LLD.md |
-| Implementation | 2 | §7, §17.2 |
+| Implementation | 2 | §7, §17.2, §17.9 (logging + exceptions) |
 | Testing | 1 | §17.5, docs/test-report.md |
-| Data Engineering | 2 | §10 (Airflow DAGs), §17.1 (DVC DAG) |
-| SCM & Continuous Integration | 2 | §17.1 (Git + Git LFS + DVC + GitHub Actions workflows) |
-| Experiment Tracking | 2 | §8, §9 |
-| Exporter Instrumentation | 2 | §11, §12, §13, §14, §16, §17.4 |
-| Software Packaging | 4 | §1, §7, and entire stack topology |
+| Data Engineering | 2 | §10 (Airflow grid), §17.1 (DVC DAG), §17.6 (throughput) |
+| SCM & Continuous Integration | 2 | §17.1 (Git + Git LFS + DVC), §17.10 (GitHub Actions workflows) |
+| Experiment Tracking | 2 | §8, §9, §17.2 (beyond autolog — data_hash + git SHA) |
+| Exporter Instrumentation | 2 | §11 (12 targets), §12, §13, §14, §16, §17.4 |
+| Software Packaging | 4 | §1, §7, §17.8 (MLproject), stack topology |
 | Viva | 8 | narrative cohesion + ADRs in `docs/adr/` + phase log in `docs/phase-log.md` |
 | **Total** | **35** | |
 
