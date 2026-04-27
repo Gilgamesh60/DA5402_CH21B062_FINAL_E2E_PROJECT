@@ -220,6 +220,28 @@ Problems faced:
 - Postgres volume persisted from Phase 1 so the `predictions` table didn't exist on existing deployments. Wrote `docker/postgres/migrations/001_phase9_predictions.sql` and applied via `psql` to the running container.
 - Feedback aggregation needs Postgres access via the compose network, not from host (Postgres isn't port-mapped). Airflow + drift-exporter both reach it by service name; local dev runs the aggregator inside the scheduler container.
 ## Phase 10 — FinBERT + quantization — ⏳ pending
-## Phase 11 — Tests + report — ⏳ pending
+## Phase 11 — Tests + report — ✅ complete
+
+Delivered:
+- 13 contract tests (`tests/contract/`) — every endpoint's live response checked against LLD contract
+- 11 end-to-end tests (`tests/e2e/`) — full user journey through frontend → api → model-server, plus every MLOps tool reachable
+- `scripts/verify_acceptance.py` — measures live stack against acceptance criteria:
+  - `/predict` p95 latency (target < 200 ms)
+  - API error rate (target < 5 %)
+  - `/ready` within 30 s
+  - Production model macro-F1 ≥ 0.75
+- `scripts/generate_test_report.py` — parses pytest JUnit XML + acceptance JSON, renders `docs/test-report.md`
+- `make test-report` — one-command pipeline: run all tests → verify acceptance → regenerate markdown
+- Test plan (`docs/test-plan.md`) updated with the real 78-case matrix by level
+- **All 78 tests passing, all 4 acceptance criteria PASS**:
+  - p95 latency: 48ms (target 200ms)
+  - error rate: 0.0% (target < 5%)
+  - ready: reached (target < 30s)
+  - macro-F1: 1.0 (target ≥ 0.75)
+
+Problems faced:
+- Initial p95 measurement hit 1.8 s because `/predict` re-opened a psycopg2 connection on every call and re-hit the MLflow registry per call. Fixed with (a) single lazy psycopg2 connection in `PredictionRepo`, (b) 5-second cache on `_current_production_ref`. p95 dropped 38x to 48ms.
+- Frontend nginx upstream cached the API container's IP pre-recreate and returned 502 on proxied `/api/*` calls. Fix: `docker compose restart frontend` re-resolves. Permanent fix via nginx `resolver` directive deferred to Phase 12.
+- `NEVEREXISTED` (12 chars) trips the ticker length validator instead of "no data"; test switched to `ZZZ` to exercise the intended 404 path.
 ## Phase 12 — Security hardening — ⏳ pending
 ## Phase 13 — Demo polish + viva prep — ⏳ pending

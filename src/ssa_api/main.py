@@ -175,14 +175,28 @@ def get_mlflow(request: Request) -> MlflowClient:
 
 
 # --- Helper: current Production version ---------------------------------------
+_PROD_REF_CACHE: dict[str, tuple[float, ModelRef | None]] = {}
+_PROD_REF_TTL_SECONDS = 5.0
+
+
 def _current_production_ref(client: MlflowClient) -> ModelRef | None:
-    versions = client.get_latest_versions(
-        name=settings.registry_model_name, stages=["Production"]
-    )
-    if not versions:
-        return None
-    v = versions[0]
-    return ModelRef(name=v.name, version=v.version, stage=v.current_stage)
+    """Look up (and briefly cache) the current Production model.
+
+    Registry lookups are MLflow-bound; caching for 5 seconds keeps
+    /predict p95 latency well under SLO without masking rollbacks.
+    """
+    cache_key = settings.registry_model_name
+    now = time.time()
+    cached = _PROD_REF_CACHE.get(cache_key)
+    if cached and now - cached[0] < _PROD_REF_TTL_SECONDS:
+        return cached[1]
+    versions = client.get_latest_versions(name=cache_key, stages=["Production"])
+    ref = None
+    if versions:
+        v = versions[0]
+        ref = ModelRef(name=v.name, version=v.version, stage=v.current_stage)
+    _PROD_REF_CACHE[cache_key] = (now, ref)
+    return ref
 
 
 # --- Probes -------------------------------------------------------------------

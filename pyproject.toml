@@ -101,4 +101,5 @@ markers = [
     "unit: fast unit tests",
     "integration: integration tests requiring services",
     "contract: API contract tests against OpenAPI spec",
+    "e2e: end-to-end tests that hit the live stack",
 ]

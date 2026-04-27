@@ -26,32 +26,49 @@ Covers functional correctness of the sentiment pipeline end-to-end, API contract
 
 Every item in `acceptance-criteria.md` has at least one corresponding test case in the matrix below.
 
-## 5. Test case matrix (initial)
+## 5. Test case matrix
 
-| ID | Level | Description | Expected | AC link |
-|---|---|---|---|---|
-| U-001 | Unit | `ssa_features.clean_text` removes URLs | URL stripped | 1.1 |
-| U-002 | Unit | `ssa_features.clean_text` preserves tickers | `$AAPL` kept | 1.1 |
-| U-003 | Unit | `ssa_ingestion.validate` rejects text shorter than min | ValidationError | 3.1 |
-| U-004 | Unit | `ssa_ingestion.validate` dedupes on (id, source) | duplicates removed | 3.1 |
-| U-005 | Unit | `ssa_model.train` logs git SHA to MLflow | tag present | 3.1 |
-| U-006 | Unit | `ssa_monitoring.drift.compute_drift` returns p-values | dict per feature | 3.1 |
-| I-001 | Integration | DVC `repro` produces baselines.json | file exists, valid JSON | 1.1 |
-| I-002 | Integration | Training run registers a new model version | registry count +1 | 3.1 |
-| I-003 | Integration | Rollback transitions stages and reloads server | /model/info shows old version | 2.4 |
-| C-001 | Contract | `/predict` 200 response matches OpenAPI schema | no schema errors | 1.1 |
-| C-002 | Contract | `/predict` rejects invalid ticker with 400 + `INVALID_TICKER` | code matches | 1.1 |
-| C-003 | Contract | `/health` returns 200 `{status:"alive"}` | body matches | 2.4 |
-| C-004 | Contract | `/ready` returns 503 when model-server down | body matches | 2.4 |
-| C-005 | Contract | `/feedback` writes row to postgres | row visible | 3.1 |
-| C-006 | Contract | `/metrics` exposes `http_request_duration_seconds` | metric present | 3.1 |
-| E-001 | E2E | Fresh stack boot → `/ready` 200 within 30 s | timing met | 2.4 |
-| E-002 | E2E | Frontend predict flow returns sentiment | UI renders result | 5 |
-| E-003 | E2E | Triggering drift alert starts retraining DAG | Airflow run appears | 3.1 |
-| F-001 | Frontend | Ticker input rejects empty string | validation error shown | 1.1 |
-| F-002 | Frontend | API error produces toast not a crash | toast visible | 1.1 |
+As of Phase 11, 78 tests across 4 levels. See `docs/test-report.md` for live pass/fail counts.
 
-Matrix grows as phases land.
+### 5.1 Unit tests (52 cases)
+
+| File | Cases | Covers |
+|---|---:|---|
+| `test_api_health.py` | 5 | API probes, metrics exposition, request-id middleware, ticker validation |
+| `test_api_inference.py` | 5 | Aggregation of per-record predictions into ticker-level sentiment |
+| `test_features_cleaning.py` | 9 | Text cleaning edge cases: URLs, mentions, cashtags, unicode, whitespace |
+| `test_features_vectorizer.py` | 6 | TF-IDF wrapper API: fit/transform/save/load, metadata, pipeline E2E |
+| `test_feedback_metrics.py` | 2 | Prometheus text exposition for feedback aggregation |
+| `test_ingestion_pipeline.py` | 3 | End-to-end seed → validate → EDA |
+| `test_ingestion_schemas.py` | 6 | Pydantic schema: ticker upcase, UTC normalise, regex, bounds, extras |
+| `test_model_metrics.py` | 4 | classification_metrics + confusion matrix rendering |
+| `test_model_reproducibility.py` | 5 | git SHA, DVC hash, hardware fingerprint, full context artifact |
+| `test_monitoring_drift.py` | 7 | KS + JSD drift detection, Prom exposition rendering |
+
+### 5.2 Integration tests (2 cases)
+
+| File | Cases | Covers |
+|---|---:|---|
+| `test_compose_config.py` | 2 | `docker compose config --quiet` valid, all 11 services present |
+
+### 5.3 Contract tests (13 cases)
+
+| Endpoint | Cases |
+|---|---:|
+| `/health`, `/ready` | 3 |
+| `/metrics` | 1 |
+| `/model/info`, `/model/versions` | 2 |
+| `/predict` (happy, invalid, unknown, bounds) | 4 |
+| `/batch_predict` | 1 |
+| `/feedback` | 2 |
+
+### 5.4 End-to-end tests (11 cases)
+
+- Frontend serves the SPA + runtime config + API proxy
+- Prediction roundtrips through nginx → api → model-server
+- Feedback journey writes to Postgres
+- MLflow, Airflow, Prometheus, Grafana, Alertmanager all reachable
+- Prometheus' `api` scrape target is UP
 
 ## 6. Entry / exit criteria
 

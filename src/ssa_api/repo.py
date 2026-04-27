@@ -27,6 +27,21 @@ logger = structlog.get_logger()
 class PredictionRepo:
     def __init__(self, dsn: str) -> None:
         self.dsn = dsn
+        self._conn = None
+
+    def _get_conn(self):
+        """Lazy single connection, auto-reconnect on failure.
+
+        A connection pool would be nicer but adds a dep; we only have one
+        process and a single worker so one long-lived conn is fine.
+        """
+        try:
+            if self._conn is None or self._conn.closed:
+                self._conn = psycopg2.connect(self.dsn)
+            return self._conn
+        except Exception:
+            self._conn = psycopg2.connect(self.dsn)
+            return self._conn
 
     def insert(
         self,
@@ -59,13 +74,20 @@ class PredictionRepo:
             latency_ms,
         )
         try:
-            with psycopg2.connect(self.dsn) as conn:
-                with conn.cursor() as cur:
-                    cur.execute(sql, params)
-                conn.commit()
+            conn = self._get_conn()
+            with conn.cursor() as cur:
+                cur.execute(sql, params)
+            conn.commit()
         except Exception as e:
             # Never let logging-side failures kill a prediction request.
             logger.warning("prediction_log_failed", error=str(e))
+            # Reset conn on error so next call reconnects
+            try:
+                if self._conn is not None:
+                    self._conn.close()
+            except Exception:
+                pass
+            self._conn = None
 
 
 # ---------------------------------------------------------------------------

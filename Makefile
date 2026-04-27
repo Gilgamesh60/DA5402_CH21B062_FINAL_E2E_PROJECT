@@ -1,4 +1,4 @@
-.PHONY: help install up down logs ps rebuild test lint format clean rollback dag
+.PHONY: help install up down logs ps rebuild test lint format clean rollback dag test-report
 
 help:
 	@echo "Common targets:"
@@ -65,3 +65,12 @@ rollback:
 	else \
 		python scripts/rollback.py $(V); \
 	fi
+
+test-report:
+	@mkdir -p artifacts docs
+	pytest tests/unit tests/integration tests/contract tests/e2e \
+		--junitxml=artifacts/junit.xml \
+		--cov=src --cov-report=xml || true
+	python scripts/verify_acceptance.py
+	python scripts/generate_test_report.py
+	@echo "wrote docs/test-report.md"
