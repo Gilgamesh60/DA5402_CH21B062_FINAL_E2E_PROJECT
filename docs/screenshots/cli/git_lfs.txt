@@ -1,0 +1,10 @@
+Listing tracked patterns
+    *.pkl (.gitattributes)
+    *.pt (.gitattributes)
+    *.pth (.gitattributes)
+    artifacts/models/** (.gitattributes)
+    *.joblib (.gitattributes)
+    *.bin (.gitattributes)
+    *.safetensors (.gitattributes)
+    *.h5 (.gitattributes)
+Listing excluded patterns

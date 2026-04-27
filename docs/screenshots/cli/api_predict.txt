@@ -1,0 +1,20 @@
+{
+    "ticker": "AAPL",
+    "sentiment": "positive",
+    "confidence": 0.440341,
+    "scores": {
+        "positive": 0.440341,
+        "neutral": 0.304048,
+        "negative": 0.255612
+    },
+    "sample_size": 40,
+    "lookback_hours": 24,
+    "model": {
+        "name": "stock-sentiment",
+        "version": "1",
+        "stage": "Production"
+    },
+    "explanations": [],
+    "request_id": "c9e44fd1-4174-4d35-94ba-fdd098f0e112",
+    "latency_ms": 3108
+}

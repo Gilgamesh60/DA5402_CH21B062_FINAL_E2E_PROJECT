@@ -1,0 +1,22 @@
+{
+    "versions": [
+        {
+            "version": "3",
+            "stage": "Staging",
+            "trained_at": "2026-04-27T16:03:28.497000",
+            "macro_f1": 1.0
+        },
+        {
+            "version": "2",
+            "stage": "Archived",
+            "trained_at": "2026-04-26T18:57:05.381000",
+            "macro_f1": 1.0
+        },
+        {
+            "version": "1",
+            "stage": "Production",
+            "trained_at": "2026-04-26T17:28:23.079000",
+            "macro_f1": 1.0
+        }
+    ]
+}

@@ -1,0 +1,3 @@
+api             http://api:8000/metrics                            up
+drift           http://drift-exporter:9101/metrics                 up
+prometheus      http://localhost:9090/metrics                      up

@@ -1,0 +1,9 @@
+ ticker | true_label | predicted_label 
+--------+------------+-----------------
+ AAPL   | positive   | positive
+ AAPL   | positive   | positive
+ AAPL   | positive   | positive
+ AAPL   | positive   | positive
+ AAPL   | positive   | positive
+(5 rows)
+

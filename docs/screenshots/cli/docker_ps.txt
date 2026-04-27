@@ -1,0 +1,12 @@
+NAMES                                       STATUS                       PORTS
+stock-sentiment-mlops-api-1                 Up 37 minutes (healthy)      0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+stock-sentiment-mlops-airflow-webserver-1   Up About an hour (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+stock-sentiment-mlops-airflow-scheduler-1   Up About an hour             8080/tcp
+stock-sentiment-mlops-prometheus-1          Up 2 hours (healthy)         0.0.0.0:9090->9090/tcp, [::]:9090->9090/tcp
+stock-sentiment-mlops-drift-exporter-1      Up 2 hours (healthy)         0.0.0.0:9101->9101/tcp, [::]:9101->9101/tcp
+stock-sentiment-mlops-alertmanager-1        Up 2 hours (healthy)         0.0.0.0:9093->9093/tcp, [::]:9093->9093/tcp
+stock-sentiment-mlops-frontend-1            Up 36 minutes (healthy)      0.0.0.0:3000->80/tcp, [::]:3000->80/tcp
+stock-sentiment-mlops-model-server-1        Up 2 hours (healthy)         0.0.0.0:5001->5001/tcp, [::]:5001->5001/tcp
+stock-sentiment-mlops-mlflow-1              Up 2 hours (healthy)         0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+stock-sentiment-mlops-grafana-1             Up 2 hours (healthy)         0.0.0.0:3001->3000/tcp, [::]:3001->3000/tcp
+stock-sentiment-mlops-postgres-1            Up 2 hours (healthy)         5432/tcp

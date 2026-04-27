@@ -1,0 +1,13 @@
+d3bfb27 feat(tests): Phase 11 - contract + e2e tests, acceptance verifier, report
+d8f3b3b feat(mlops): Phase 9 - feedback loop, retraining DAG, Alertmanager
+6e71362 feat(ci): Phase 8 - CI/CD workflows + rollback automation
+d000ade feat(frontend): Phase 7 - React UI with 5 screens + pipeline viz
+fce8744 feat(monitoring): Phase 6 - drift detection, exporter, alerts, dashboard
+f1cd33e feat(api): Phase 5 - real FastAPI gateway + MLflow models serve
+cad311d chore: pre-Phase-5 fixes (LFS, Airflow mount, ADRs, experiment rename)
+1d84484 feat(model): Phase 4 - MLflow training, registry, evaluate
+d57ef0e feat(features): Phase 3 - feature engineering package
+1f11a91 feat(data): Phase 2 - ingestion, validation, EDA, drift baselines
+314db59 fix(infra): boot-verified Phase 1 stack on Colima
+535a927 feat(infra): Phase 1 — full compose stack with healthy stubs
+32f4ebb chore: scaffold project skeleton and Phase 0 contracts

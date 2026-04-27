@@ -1,6 +1,6 @@
 # HELP feedback_total Total feedback submissions
 # TYPE feedback_total gauge
-feedback_total 2
+feedback_total 8
 # HELP feedback_agreement_rate Fraction of predictions user confirmed correct
 # TYPE feedback_agreement_rate gauge
 feedback_agreement_rate 1.0
@@ -9,4 +9,4 @@ feedback_agreement_rate 1.0
 feedback_accuracy_by_model{version="1"} 1.0
 # HELP feedback_last_run_timestamp Unix timestamp of the last feedback aggregation
 # TYPE feedback_last_run_timestamp gauge
-feedback_last_run_timestamp 1777305688
+feedback_last_run_timestamp 1777309204
