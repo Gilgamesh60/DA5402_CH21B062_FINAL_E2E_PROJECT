@@ -464,25 +464,5 @@ Three workflow files in `.github/workflows/`:
 
 The DVC pipeline itself — the actual CI artefact the rubric asks for — is validated every run of `dvc repro`, which is captured in [§17.1](#171-git--dvc--git-lfs-scm--ci-2).
 
----
-
-## Rubric coverage summary
-
-| Rubric item | Points | Primary evidence in this doc |
-|---|---:|---|
-| UI/UX | 6 | §2, §3, §4, §5, §6 |
-| ML Pipeline Visualization | 4 | §3, §10 (grid view), §11, §17.6 (speed/throughput) |
-| Design Principle | 2 | §7 (Swagger), docs/HLD.md, docs/LLD.md |
-| Implementation | 2 | §7, §17.2, §17.9 (logging + exceptions) |
-| Testing | 1 | §17.5, docs/test-report.md |
-| Data Engineering | 2 | §10 (Airflow grid), §17.1 (DVC DAG), §17.6 (throughput) |
-| SCM & Continuous Integration | 2 | §17.1 (Git + Git LFS + DVC), §17.10 (GitHub Actions workflows) |
-| Experiment Tracking | 2 | §8, §9, §17.2 (beyond autolog — data_hash + git SHA) |
-| Exporter Instrumentation | 2 | §11 (12 targets), §12, §13, §14, §16, §17.4 |
-| Software Packaging | 4 | §1, §7, §17.8 (MLproject), stack topology |
-| Viva | 8 | narrative cohesion + ADRs in `docs/adr/` + phase log in `docs/phase-log.md` |
-| **Total** | **35** | |
-
----
 
 All screenshots are reproducible from the running stack + current code.
