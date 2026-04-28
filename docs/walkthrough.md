@@ -8,15 +8,7 @@ A guided tour of the Stock Sentiment MLOps system with screenshots and CLI proof
 - Production model: `stock-sentiment` v5, Logistic Regression over TF-IDF
 - Data source: 300-record seed corpus (templated; Phase 10 FinBERT deferred)
 
-> **Honest note on the seed data.** The templated seed corpus produces
-> perfect validation/test scores (macro-F1 = 1.0) because the 8 templates
-> are trivially separable. It also makes the live KS drift check fire
-> continuously — the live text length distribution is narrower than the
-> synthetic-normal baseline, so the alert pipeline runs **hot by design**.
-> This is expected; it proves the detection + alerting path rather than
-> model robustness. Real metrics land when Phase 10's FinBERT + Financial
-> PhraseBank is wired in. Every drift alert you see in the screenshots is
-> a demonstration of the pipeline, not a regression.
+
 
 **Quick navigation**
 
