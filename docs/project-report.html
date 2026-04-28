@@ -1,436 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<style>
-@page {
-    size: A4;
-    margin: 2cm 2.5cm;
-}
+<head><meta charset="utf-8"><style>
+@page { size: A4; margin: 1.8cm 2cm; }
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 11pt;
-    line-height: 1.6;
-    color: #1f2937;
-    max-width: 100%;
+    font-size: 11pt; line-height: 1.55; color: #1f2937;
 }
-h1 { font-size: 22pt; color: #0f172a; margin-top: 0; }
-h2 { font-size: 16pt; color: #1e3a8a; margin-top: 1.5em; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.3em; }
-h3 { font-size: 13pt; color: #334155; margin-top: 1.2em; }
-h4 { font-size: 11pt; color: #475569; }
-table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 10pt; }
-th, td { border: 1px solid #cbd5e1; padding: 6px 10px; text-align: left; }
+h1 { font-size: 20pt; color: #0f172a; margin-top: 0; text-align: center; }
+h1 + p { text-align: center; font-size: 12pt; color: #475569; }
+h2 { font-size: 15pt; color: #1e3a8a; margin-top: 1.4em; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25em; }
+h3 { font-size: 12pt; color: #334155; margin-top: 1em; }
+table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 9.5pt; }
+th, td { border: 1px solid #cbd5e1; padding: 5px 8px; text-align: left; }
 th { background: #f1f5f9; font-weight: 600; }
 tr:nth-child(even) { background: #f8fafc; }
-code {
-    background: #f1f5f9; padding: 1px 4px; border-radius: 3px;
-    font-family: "SFMono-Regular", Menlo, monospace; font-size: 9.5pt;
-}
-pre {
-    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;
-    padding: 12px 16px; font-size: 9pt; line-height: 1.5;
-    overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;
-}
+code { background: #f1f5f9; padding: 1px 4px; border-radius: 3px; font-family: Menlo, monospace; font-size: 9pt; }
+pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; padding: 10px 14px; font-size: 8.5pt; line-height: 1.45; white-space: pre-wrap; word-wrap: break-word; }
 pre code { background: none; padding: 0; }
-blockquote {
-    border-left: 3px solid #2563eb; margin: 1em 0; padding: 0.5em 1em;
-    background: #eff6ff; color: #1e40af; font-size: 10pt;
-}
+blockquote { border-left: 3px solid #2563eb; margin: 0.8em 0; padding: 0.4em 1em; background: #eff6ff; color: #1e40af; font-size: 10pt; }
+img { max-width: 100%; border: 1px solid #e2e8f0; border-radius: 4px; margin: 0.5em 0; }
 a { color: #2563eb; text-decoration: none; }
-hr { border: none; border-top: 1px solid #e2e8f0; margin: 2em 0; }
-ul, ol { padding-left: 1.5em; }
-li { margin-bottom: 0.3em; }
-</style>
-</head>
-<body>
-<h1 id="stock-sentiment-analysis-system-project-report">Stock Sentiment Analysis System — Project Report</h1>
-<p><strong>Course</strong>: MLOps
-<strong>Project</strong>: Stock Sentiment Analysis System with MLOps
-<strong>Domain</strong>: Finance / NLP</p>
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.5em 0; }
+ul, ol { padding-left: 1.4em; }
+li { margin-bottom: 0.2em; }
+</style></head>
+<body><h1 id="stock-sentiment-analysis-system-with-mlops">Stock Sentiment Analysis System with MLOps</h1>
+<p><strong>Course Project Report</strong></p>
 <hr />
-<h2 id="table-of-contents">Table of Contents</h2>
-<ol>
-<li><a href="#1-executive-summary">Executive Summary</a></li>
-<li><a href="#2-problem-definition">Problem Definition</a></li>
-<li><a href="#3-system-architecture">System Architecture</a></li>
-<li><a href="#4-technology-stack--rationale">Technology Stack &amp; Rationale</a></li>
-<li><a href="#5-data-engineering-pipeline">Data Engineering Pipeline</a></li>
-<li><a href="#6-feature-engineering">Feature Engineering</a></li>
-<li><a href="#7-model-development--training">Model Development &amp; Training</a></li>
-<li><a href="#8-model-deployment--serving">Model Deployment &amp; Serving</a></li>
-<li><a href="#9-monitoring-drift-detection--alerting">Monitoring, Drift Detection &amp; Alerting</a></li>
-<li><a href="#10-feedback-loop--retraining">Feedback Loop &amp; Retraining</a></li>
-<li><a href="#11-frontend-application">Frontend Application</a></li>
-<li><a href="#12-cicd--version-control">CI/CD &amp; Version Control</a></li>
-<li><a href="#13-testing--acceptance">Testing &amp; Acceptance</a></li>
-<li><a href="#14-results--evidence">Results &amp; Evidence</a></li>
-<li><a href="#15-challenges--mitigations">Challenges &amp; Mitigations</a></li>
-<li><a href="#16-limitations--future-work">Limitations &amp; Future Work</a></li>
-<li><a href="#17-conclusion">Conclusion</a></li>
-<li><a href="#18-appendices">Appendices</a></li>
-</ol>
-<hr />
-<h2 id="1-executive-summary">1. Executive Summary</h2>
-<p>This project implements an end-to-end AI application that predicts stock sentiment (positive / negative / neutral) from financial news and social media text. The system is built with a full MLOps lifecycle — automated data ingestion, version-controlled pipelines, experiment tracking, containerised deployment, real-time monitoring, drift detection, and automated retraining.</p>
-<p>The application runs entirely on local infrastructure (no cloud) using Docker Compose to orchestrate 12 services. It demonstrates every stage of the ML product lifecycle as prescribed by the course MLOps guidelines, from problem definition through continuous monitoring and maintenance.</p>
-<p><strong>Key outcomes:</strong>
-- 78 automated tests (unit + integration + contract + end-to-end), 100% pass rate
-- All 4 acceptance criteria met: p95 latency 48–193 ms (target &lt; 200 ms), error rate 0%, macro-F1 1.0 (target ≥ 0.75), readiness within 30 s
-- 12 Prometheus scrape targets monitoring every component
-- 7 alert rules covering API SLOs and data drift
-- Automated retraining pipeline triggered by drift alerts via Alertmanager → Airflow webhook</p>
-<hr />
-<h2 id="2-problem-definition">2. Problem Definition</h2>
-<h3 id="21-business-problem">2.1 Business problem</h3>
-<p>Investors and analysts need a quick, aggregated view of market sentiment around specific stock tickers. Manually reading hundreds of news articles and social media posts is impractical. An automated sentiment classifier that processes recent text and returns a single actionable signal — with a confidence score — addresses this need.</p>
-<h3 id="22-success-metrics">2.2 Success metrics</h3>
-<table>
-<thead>
-<tr>
-<th>Category</th>
-<th>Metric</th>
-<th>Target</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ML quality</td>
-<td>macro-F1 on held-out test set</td>
-<td>≥ 0.75</td>
-</tr>
-<tr>
-<td>Business</td>
-<td><code>/predict</code> p95 latency</td>
-<td>&lt; 200 ms</td>
-</tr>
-<tr>
-<td>Operational</td>
-<td>API error rate (5-min window)</td>
-<td>&lt; 5%</td>
-</tr>
-<tr>
-<td>Operational</td>
-<td><code>/ready</code> returns 200 after boot</td>
-<td>&lt; 30 s</td>
-</tr>
-</tbody>
-</table>
-<p>Both ML metrics (F1-score) and business metrics (inference latency) are defined upfront as required by the MLOps guidelines.</p>
-<h3 id="23-scope-and-constraints">2.3 Scope and constraints</h3>
+<h2 id="1-introduction">1. Introduction</h2>
+<h3 id="11-about-the-project">1.1 About the project</h3>
+<p>For this MLOps course project, I built a stock sentiment analysis system that takes a stock ticker (like AAPL or TSLA) and tells you whether the current sentiment around it is positive, negative, or neutral. It does this by pulling recent financial news and social media posts, running them through a trained ML classifier, and returning an aggregated sentiment score.</p>
+<p>The real focus of this project isn't the ML model itself — it's the <strong>MLOps infrastructure</strong> around it. The entire system follows the ML product lifecycle: automated data ingestion, version-controlled pipelines, experiment tracking, containerised deployment, real-time monitoring, drift detection, and automated retraining.</p>
+<h3 id="12-what-it-does">1.2 What it does</h3>
 <ul>
-<li><strong>No cloud</strong> — all services run locally via Docker Compose on a single host</li>
-<li><strong>English only</strong> — financial text in English from news APIs and Reddit</li>
-<li><strong>Single-tenant</strong> — no user authentication; this is a research demo</li>
-<li><strong>Local hardware optimisation</strong> — model must fit in CPU-only containers (quantisation/pruning path designed for future transformer models)</li>
+<li>User enters a stock ticker on the web UI</li>
+<li>System fetches recent news/social text for that ticker</li>
+<li>Text goes through a cleaning + vectorisation pipeline</li>
+<li>A trained classifier predicts sentiment per record</li>
+<li>Results are aggregated into a single ticker-level prediction with confidence</li>
+<li>User can submit feedback (ground truth) which feeds back into retraining</li>
 </ul>
-<hr />
-<h2 id="3-system-architecture">3. System Architecture</h2>
-<h3 id="31-architecture-diagram">3.1 Architecture diagram</h3>
-<pre><code class="language-mermaid">flowchart TB
-    subgraph Client
-        U[End user browser]
-    end
-    subgraph Frontend[&quot;frontend (React + Vite)&quot;]
-        FE[Web UI]
-    end
-    subgraph Backend[&quot;api (FastAPI gateway)&quot;]
-        API[REST endpoints]
-    end
-    subgraph ModelServer[&quot;model-server (mlflow models serve)&quot;]
-        MS[Served model from registry]
-    end
-    subgraph Tracking[&quot;mlflow&quot;]
-        TS[Tracking server]
-        MR[Model Registry]
-    end
-    subgraph DataPlane[&quot;airflow&quot;]
-        DAG1[Ingestion DAG]
-        DAG2[Drift DAG]
-        DAG3[Retraining DAG]
-    end
-    subgraph Storage[&quot;postgres + volumes&quot;]
-        PG[(Postgres)]
-        VOL[(DVC remote)]
-    end
-    subgraph Observability
-        PROM[prometheus + blackbox]
-        GRAF[grafana]
-        AM[alertmanager]
-    end
-    U --&gt; FE
-    FE --&gt;|configurable REST| API
-    API --&gt;|HTTP /invocations| MS
-    MS --&gt;|loads from| MR
-    API --&gt;|writes| PG
-    API --&gt;|/metrics| PROM
-    PROM --&gt; GRAF
-    PROM --&gt;|alerts| AM
-    AM --&gt;|webhook| DAG3
-    DAG1 --&gt; VOL
-    DAG3 --&gt;|new run| TS
-    TS --&gt; PG
-    MR --&gt; PG
-</code></pre>
-<h3 id="32-service-inventory">3.2 Service inventory</h3>
+<h3 id="13-tech-stack-overview">1.3 Tech stack overview</h3>
+<p>Everything runs locally using Docker Compose — no cloud services. The stack has 12 containers:</p>
 <table>
 <thead>
 <tr>
 <th>Service</th>
-<th>Technology</th>
-<th>Role</th>
-<th>Port</th>
+<th>What it does</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>frontend</code></td>
-<td>React + Vite + Tailwind, nginx</td>
-<td>Web UI for end users</td>
-<td>3000</td>
+<td>Frontend (React)</td>
+<td>Web UI for users</td>
 </tr>
 <tr>
-<td><code>api</code></td>
-<td>FastAPI + Uvicorn</td>
-<td>REST gateway, validation, metrics, feedback</td>
-<td>8000</td>
+<td>API (FastAPI)</td>
+<td>REST gateway</td>
 </tr>
 <tr>
-<td><code>model-server</code></td>
-<td><code>mlflow models serve</code></td>
-<td>Loads Production model from registry, serves <code>/invocations</code></td>
-<td>5001</td>
+<td>Model server (MLflow)</td>
+<td>Serves the trained model</td>
 </tr>
 <tr>
-<td><code>mlflow</code></td>
-<td>MLflow 3.11.1</td>
-<td>Experiment tracking + Model Registry</td>
-<td>5000</td>
+<td>MLflow</td>
+<td>Experiment tracking + model registry</td>
 </tr>
 <tr>
-<td><code>airflow-webserver</code></td>
-<td>Apache Airflow 2.8.1</td>
-<td>DAG UI + REST API</td>
-<td>8080</td>
+<td>Airflow</td>
+<td>Scheduled pipelines (ingestion, drift, retraining)</td>
 </tr>
 <tr>
-<td><code>airflow-scheduler</code></td>
-<td>Apache Airflow 2.8.1</td>
-<td>Executes scheduled/triggered DAGs</td>
-<td>—</td>
+<td>Postgres</td>
+<td>Database for MLflow, Airflow, predictions, feedback</td>
 </tr>
 <tr>
-<td><code>postgres</code></td>
-<td>PostgreSQL 15</td>
-<td>Backend store for MLflow, Airflow, predictions, feedback</td>
-<td>5432 (internal)</td>
+<td>Prometheus</td>
+<td>Metrics collection</td>
 </tr>
 <tr>
-<td><code>prometheus</code></td>
-<td>Prometheus 2.49</td>
-<td>Metrics scraping + alert evaluation</td>
-<td>9090</td>
+<td>Grafana</td>
+<td>Dashboards</td>
 </tr>
 <tr>
-<td><code>grafana</code></td>
-<td>Grafana 10.3</td>
-<td>Near-real-time dashboards</td>
-<td>3001</td>
-</tr>
-<tr>
-<td><code>alertmanager</code></td>
-<td>Alertmanager 0.27</td>
-<td>Alert routing + webhook to Airflow</td>
-<td>9093</td>
-</tr>
-<tr>
-<td><code>drift-exporter</code></td>
-<td>Custom Python HTTP server</td>
-<td>Serves drift + feedback Prometheus metrics</td>
-<td>9101</td>
-</tr>
-<tr>
-<td><code>blackbox-exporter</code></td>
-<td>Prometheus Blackbox Exporter</td>
-<td>HTTP/TCP up-probes for all services</td>
-<td>9115</td>
-</tr>
-</tbody>
-</table>
-<h3 id="33-data-flow">3.3 Data flow</h3>
-<p><strong>Training path</strong>: Airflow ingestion DAG → validate → feature-engineer → DVC-tracked parquet → MLflow training run → Model Registry → model-server reload</p>
-<p><strong>Inference path</strong>: browser → frontend (nginx proxy) → <code>/predict</code> on api → forwards to model-server <code>/invocations</code> → aggregated response → metrics emitted</p>
-<p><strong>Feedback path</strong>: user submits ground-truth via frontend → <code>/feedback</code> on api → postgres <code>feedback</code> table (joined to <code>predictions</code> table) → hourly Airflow aggregation → Prometheus metric → Grafana decay dashboard → retrain trigger when thresholds breach</p>
-<h3 id="34-loose-coupling">3.4 Loose coupling</h3>
-<p>The frontend and backend are strictly decoupled as required by the evaluation rubric:
-- Frontend is a static React bundle served by nginx
-- It communicates with the backend exclusively via configurable REST API calls
-- The API base URL is injected at container boot time via a runtime <code>/config.js</code> file — no rebuild needed to re-point
-- Frontend and backend share zero code, zero build steps, zero Python imports</p>
-<hr />
-<h2 id="4-technology-stack-rationale">4. Technology Stack &amp; Rationale</h2>
-<table>
-<thead>
-<tr>
-<th>Component</th>
-<th>Technology</th>
-<th>Why this choice</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Version control</strong></td>
-<td>Git + Git LFS + DVC</td>
-<td>Rubric requires all three. Git for code, Git LFS for model binaries (<code>.joblib</code>, <code>.bin</code>, <code>.safetensors</code>), DVC for data + pipeline versioning.</td>
-</tr>
-<tr>
-<td><strong>Data engineering</strong></td>
-<td>Apache Airflow</td>
-<td>Rubric requires Airflow/Spark/Ray/custom. Airflow gives us a scheduler, a web UI for pipeline management, and a REST API for webhook-triggered retraining — all in one.</td>
-</tr>
-<tr>
-<td><strong>Feature engineering</strong></td>
-<td>scikit-learn TF-IDF + custom Python</td>
-<td>Versioned independently from the model package (<code>ssa_features v0.2.0</code>). The vectorizer is persisted as a <code>.joblib</code> artifact so serving uses the exact same transform.</td>
-</tr>
-<tr>
-<td><strong>Experiment tracking</strong></td>
-<td>MLflow 3.11.1</td>
-<td>Rubric mandates MLflow. Postgres-backed for durable registry stage transitions. Every run stamps git SHA + DVC data hash + hardware fingerprint beyond autolog.</td>
-</tr>
-<tr>
-<td><strong>Model serving</strong></td>
-<td><code>mlflow models serve</code> (pyfunc)</td>
-<td>Rubric asks for "MLflow API-ification". The pyfunc wrapper bundles (vectorizer + classifier) so the model-server accepts raw text — the API gateway never touches sparse matrices.</td>
-</tr>
-<tr>
-<td><strong>API gateway</strong></td>
-<td>FastAPI</td>
-<td>Rubric mandates FastAPI. Auto-generates OpenAPI spec from Pydantic models, matching the LLD exactly. Prometheus client built in.</td>
-</tr>
-<tr>
-<td><strong>Containerisation</strong></td>
-<td>Docker + Docker Compose</td>
-<td>Rubric mandates Docker + compose with separate services. 12 services on a shared bridge network.</td>
-</tr>
-<tr>
-<td><strong>Environment parity</strong></td>
-<td>MLproject + <code>python_env.yaml</code></td>
-<td>Rubric asks for MLprojects. Defines 5 entry points (ingest, features, train, evaluate, main) bound to a pinned Python environment.</td>
-</tr>
-<tr>
-<td><strong>Monitoring</strong></td>
-<td>Prometheus + Grafana</td>
-<td>Rubric mandates both. 5-second scrape interval, 2 dashboards (API SLOs + ML monitoring), 7 alert rules.</td>
-</tr>
-<tr>
-<td><strong>Alerting</strong></td>
 <td>Alertmanager</td>
-<td>Routes drift alerts to the Airflow retraining DAG via webhook.</td>
+<td>Routes alerts to trigger retraining</td>
 </tr>
 <tr>
-<td><strong>Frontend</strong></td>
-<td>React 18 + Vite + Tailwind CSS</td>
-<td>Streamlit would violate loose coupling (imports Python). React gives us full control over UX, responsiveness, and the 6-point UI/UX rubric.</td>
+<td>Drift exporter</td>
+<td>Serves drift + feedback metrics</td>
 </tr>
 <tr>
-<td><strong>Database</strong></td>
-<td>PostgreSQL 15</td>
-<td>Single RDBMS hosting MLflow metadata, Airflow state, predictions log, and feedback table. Keeps the local stack small.</td>
+<td>Blackbox exporter</td>
+<td>HTTP/TCP probes for all services</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="5-data-engineering-pipeline">5. Data Engineering Pipeline</h2>
-<h3 id="51-data-sources">5.1 Data sources</h3>
-<table>
-<thead>
-<tr>
-<th>Source</th>
-<th>Type</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Seed corpus</td>
-<td>300 labelled records, 7 tickers, deterministic</td>
-<td>Active (always available)</td>
-</tr>
-<tr>
-<td>NewsAPI</td>
-<td>Financial news articles</td>
-<td>Opt-in via <code>NEWSAPI_KEY</code> env var</td>
-</tr>
-<tr>
-<td>Finnhub</td>
-<td>Financial news</td>
-<td>Opt-in via <code>FINNHUB_API_KEY</code></td>
-</tr>
-<tr>
-<td>Reddit (PRAW)</td>
-<td>Social posts from r/wallstreetbets, r/stocks, r/investing</td>
-<td>Opt-in via Reddit credentials</td>
-</tr>
-</tbody>
-</table>
-<p>The seed corpus ensures the pipeline runs offline and in CI without external API keys.</p>
-<h3 id="52-pipeline-stages-dvc-dag">5.2 Pipeline stages (DVC DAG)</h3>
+<h2 id="2-system-architecture">2. System Architecture</h2>
+<h3 id="21-architecture-diagram">2.1 Architecture diagram</h3>
+<pre><code class="language-mermaid">flowchart TB
+    U[Browser] --&gt; FE[Frontend - React]
+    FE --&gt;|REST API| API[API Gateway - FastAPI]
+    API --&gt;|/invocations| MS[Model Server - MLflow serve]
+    MS --&gt;|loads from| MR[Model Registry]
+    API --&gt;|writes| PG[(Postgres)]
+    API --&gt;|/metrics| PROM[Prometheus]
+    PROM --&gt; GRAF[Grafana]
+    PROM --&gt;|alerts| AM[Alertmanager]
+    AM --&gt;|webhook| AF[Airflow - Retraining DAG]
+    AF --&gt;|new run| MLF[MLflow Tracking]
+    MLF --&gt; PG
+</code></pre>
+<h3 id="22-why-this-architecture">2.2 Why this architecture</h3>
+<p>The MLOps guidelines document says to use "docker-compose to manage a multi-container setup: one for the API, one for the model server, and one for monitoring." So I split the system into three main layers:</p>
+<ol>
+<li><strong>API layer</strong> (FastAPI) — handles user requests, validation, logging</li>
+<li><strong>Model layer</strong> (MLflow models serve) — only does inference, nothing else</li>
+<li><strong>Monitoring layer</strong> (Prometheus + Grafana + Alertmanager) — watches everything</li>
+</ol>
+<p>The frontend is completely separate — it only talks to the backend through REST calls. This is the "loose coupling" the rubric requires. The API URL is configurable at runtime so the same Docker image works in any environment without rebuilding.</p>
+<h3 id="23-running-stack-proof">2.3 Running stack proof</h3>
+<p>Here's the actual <code>docker ps</code> output showing all 12 services running and healthy:</p>
+<p><img alt="Docker PS" src="screenshots/cli_docker_ps_placeholder.png" /></p>
+<p><em>(See <code>docs/screenshots/cli/docker_ps.txt</code> for the full output)</em></p>
+<hr />
+<h2 id="3-data-engineering">3. Data Engineering</h2>
+<h3 id="31-data-sources">3.1 Data sources</h3>
+<p>I built pluggable source adapters:
+- <strong>Seed corpus</strong> (always active) — 300 labelled records across 7 tickers, generated deterministically so the pipeline works offline
+- <strong>NewsAPI</strong> — financial news (opt-in via API key)
+- <strong>Reddit via PRAW</strong> — social posts from investing subreddits (opt-in)</p>
+<p>The seed corpus is what I used for all demos and testing. It ensures everything is reproducible without needing external API keys.</p>
+<h3 id="32-pipeline-stages">3.2 Pipeline stages</h3>
+<p>The data pipeline is defined in <code>dvc.yaml</code> and runs through these stages:</p>
 <pre><code>ingest → validate → eda_baselines
                   → features → train → evaluate
                   → drift
 </code></pre>
+<p>Each stage is a Python module that can be run standalone or through DVC (<code>dvc repro</code>) or through Airflow.</p>
+<h3 id="33-airflow-dags">3.3 Airflow DAGs</h3>
+<p>I have 4 Airflow DAGs:</p>
 <table>
 <thead>
 <tr>
-<th>Stage</th>
+<th>DAG</th>
+<th>Schedule</th>
 <th>What it does</th>
-<th>Output</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>ingest</code></td>
-<td>Pulls from all enabled sources, normalises into <code>TextRecord</code> schema</td>
-<td><code>data/raw/records.parquet</code></td>
+<td><code>ssa_ingestion</code></td>
+<td>Manual</td>
+<td>Runs ingest → validate → EDA</td>
 </tr>
 <tr>
-<td><code>validate</code></td>
-<td>Schema re-check, deduplication, length + language filtering</td>
-<td><code>data/interim/validated.parquet</code></td>
+<td><code>ssa_drift_detection</code></td>
+<td>Every 30 min</td>
+<td>Compares live data to baselines</td>
 </tr>
 <tr>
-<td><code>eda_baselines</code></td>
-<td>Computes drift baselines (mean, std, variance, distributions)</td>
-<td><code>artifacts/baselines.json</code></td>
+<td><code>ssa_feedback_metrics</code></td>
+<td>Hourly</td>
+<td>Aggregates user feedback</td>
 </tr>
 <tr>
-<td><code>features</code></td>
-<td>Stratified train/val/test split, TF-IDF vectorisation (fit on train only)</td>
-<td><code>data/processed/{train,val,test}.parquet</code> + <code>artifacts/vectorizer.joblib</code></td>
-</tr>
-<tr>
-<td><code>train</code></td>
-<td>Trains classifier, logs everything to MLflow, registers model</td>
-<td><code>artifacts/train_metrics.json</code></td>
-</tr>
-<tr>
-<td><code>evaluate</code></td>
-<td>Holdout test metrics, promotion decision</td>
-<td><code>artifacts/eval_metrics.json</code> + <code>artifacts/promotion_decision.json</code></td>
-</tr>
-<tr>
-<td><code>drift</code></td>
-<td>KS + JSD drift detection against baselines</td>
-<td><code>artifacts/drift_metrics.prom</code></td>
+<td><code>ssa_retraining</code></td>
+<td>Manual + webhook</td>
+<td>Retrains the model when drift is detected</td>
 </tr>
 </tbody>
 </table>
-<h3 id="53-throughput">5.3 Throughput</h3>
-<p>Measured on the seed corpus (300 records, Colima aarch64):</p>
+<p>Here's the Airflow UI showing the DAGs:</p>
+<p><img alt="Airflow DAGs" src="screenshots/10_airflow_dags.png" /></p>
+<p>And here's the grid view showing successful task runs (green = success):</p>
+<p><img alt="Airflow Grid View" src="screenshots/10b_airflow_dag_grid.png" /></p>
+<h3 id="34-pipeline-throughput">3.4 Pipeline throughput</h3>
 <table>
 <thead>
 <tr>
 <th>Stage</th>
+<th>Records</th>
 <th>Duration</th>
 <th>Throughput</th>
 </tr>
@@ -438,286 +189,167 @@ li { margin-bottom: 0.3em; }
 <tbody>
 <tr>
 <td>ingest</td>
+<td>300</td>
 <td>0.08 s</td>
-<td><strong>3,688 rec/s</strong></td>
+<td>3,688 rec/s</td>
 </tr>
 <tr>
 <td>validate</td>
+<td>300 → 300</td>
 <td>&lt; 0.05 s</td>
 <td>~6,000 rec/s</td>
 </tr>
 <tr>
 <td>features</td>
+<td>300 → 209/30/61 split</td>
 <td>&lt; 0.2 s</td>
 <td>—</td>
 </tr>
 </tbody>
 </table>
-<h3 id="54-airflow-dags">5.4 Airflow DAGs</h3>
-<table>
-<thead>
-<tr>
-<th>DAG</th>
-<th>Schedule</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ssa_ingestion</code></td>
-<td>Manual</td>
-<td>ingest → validate → eda_baselines</td>
-</tr>
-<tr>
-<td><code>ssa_drift_detection</code></td>
-<td>Every 30 min</td>
-<td>Compare live features to baselines</td>
-</tr>
-<tr>
-<td><code>ssa_feedback_metrics</code></td>
-<td>Hourly</td>
-<td>Aggregate feedback into Prometheus metrics</td>
-</tr>
-<tr>
-<td><code>ssa_retraining</code></td>
-<td>Manual + webhook</td>
-<td>features → train → evaluate → auto-promote</td>
-</tr>
-</tbody>
-</table>
 <hr />
-<h2 id="6-feature-engineering">6. Feature Engineering</h2>
-<h3 id="61-text-cleaning">6.1 Text cleaning</h3>
-<p>Deterministic, stateless pipeline (<code>ssa_features.cleaning</code>):
+<h2 id="4-feature-engineering">4. Feature Engineering</h2>
+<h3 id="41-text-cleaning">4.1 Text cleaning</h3>
+<p>The cleaning pipeline (<code>ssa_features.cleaning</code>) does:
 - URL removal
 - @mention removal
-- $CASHTAG → ticker symbol preservation
-- Unicode NFKC normalisation
+- $CASHTAG preservation (e.g. $AAPL → AAPL)
+- Unicode normalisation
 - Whitespace collapse
-- Edge punctuation stripping
-- Optional lowercasing</p>
-<h3 id="62-vectorisation">6.2 Vectorisation</h3>
-<p>TF-IDF with sublinear term frequency, bigrams, and a vocabulary cap of 20,000 features. The fitted vectorizer is persisted as <code>artifacts/vectorizer.joblib</code> and bundled into the MLflow pyfunc model so serving uses the exact same transform.</p>
-<h3 id="63-independent-versioning">6.3 Independent versioning</h3>
-<p><code>ssa_features</code> is a separately-versioned Python package (<code>__version__ = "0.2.0"</code>). The version string is stamped onto every saved vectorizer so downstream code can detect feature/model version mismatches. This satisfies the MLOps guideline: "version their feature engineering logic separately from model logic."</p>
+- Lowercasing</p>
+<h3 id="42-vectorisation">4.2 Vectorisation</h3>
+<p>I used TF-IDF with bigrams, sublinear term frequency, and a 20,000-feature vocabulary cap. The fitted vectorizer is saved as <code>artifacts/vectorizer.joblib</code> and bundled into the MLflow model so serving uses the exact same transform as training.</p>
+<h3 id="43-independent-versioning">4.3 Independent versioning</h3>
+<p>The feature package (<code>ssa_features</code>) has its own version number (<code>0.2.0</code>) separate from the model package. This is a requirement from the MLOps guidelines — "version their feature engineering logic separately from model logic."</p>
 <hr />
-<h2 id="7-model-development-training">7. Model Development &amp; Training</h2>
-<h3 id="71-model-selection">7.1 Model selection</h3>
-<p><strong>Baseline</strong>: Logistic Regression on TF-IDF features. Chosen for speed (trains in &lt; 0.1 s), explainability (coefficient-based feature importance), and pipeline-proving capability.</p>
-<p><strong>Future upgrade path</strong>: FinBERT / DistilBERT fine-tuned on Financial PhraseBank + FiQA, with dynamic quantisation for CPU-only inference.</p>
-<h3 id="72-experiment-tracking-mlflow">7.2 Experiment tracking (MLflow)</h3>
-<p>Every training run logs:</p>
-<table>
-<thead>
-<tr>
-<th>Category</th>
-<th>What's logged</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Autolog</strong></td>
-<td>sklearn model params, training metrics</td>
-</tr>
-<tr>
-<td><strong>Custom — reproducibility</strong></td>
-<td><code>git.commit_sha</code>, <code>dvc.data_hash</code>, hardware fingerprint, pip freeze</td>
-</tr>
-<tr>
-<td><strong>Custom — evaluation</strong></td>
-<td>Confusion matrix PNG, per-class precision/recall/F1, classification report text</td>
-</tr>
-<tr>
-<td><strong>Custom — explainability</strong></td>
-<td>Top 20 feature weights per class, sample predictions CSV</td>
-</tr>
-<tr>
-<td><strong>Custom — metadata</strong></td>
-<td>Feature package version, vectorizer config, params.yaml snapshot</td>
-</tr>
-</tbody>
-</table>
-<p>This goes well beyond autolog, satisfying the rubric's "Besides Autolog, have you made provisions to track other information?"</p>
-<h3 id="73-model-registry">7.3 Model Registry</h3>
-<p>Models are registered in the MLflow Model Registry under the name <code>stock-sentiment</code>. The lifecycle:
-1. Training registers a new version
-2. Evaluate stage transitions it to <strong>Staging</strong>
-3. If it beats the current Production model by a configurable delta, it's promoted to <strong>Production</strong>
-4. Previous Production is <strong>Archived</strong>
-5. Rollback reverses the transition</p>
-<h3 id="74-reproducibility">7.4 Reproducibility</h3>
-<p>Every experiment is reproducible from a <code>(git_commit_sha, mlflow_run_id)</code> pair. The <code>/model/info</code> API endpoint surfaces both values plus the DVC data hash for any currently-serving model.</p>
+<h2 id="5-model-training-experiment-tracking">5. Model Training &amp; Experiment Tracking</h2>
+<h3 id="51-model">5.1 Model</h3>
+<p>I used Logistic Regression on TF-IDF features as the baseline. It trains in under 0.1 seconds and is easy to explain (you can look at the top feature weights per class).</p>
+<h3 id="52-mlflow-tracking">5.2 MLflow tracking</h3>
+<p>Every training run logs to MLflow. Here's what gets tracked:</p>
+<p><strong>Standard (autolog):</strong> model parameters, training metrics</p>
+<p><strong>Custom (beyond autolog):</strong>
+- Git commit SHA
+- DVC data hash (pins the exact data version)
+- Hardware fingerprint
+- Confusion matrix image
+- Per-class precision/recall/F1
+- Top 20 feature weights per class
+- Sample predictions CSV
+- Full params.yaml snapshot
+- pip freeze environment</p>
+<p>This satisfies the rubric's "Besides Autolog, have you made provisions to track other information?"</p>
+<p>Here's the MLflow experiments UI:</p>
+<p><img alt="MLflow Experiments" src="screenshots/08_mlflow_experiments.png" /></p>
+<h3 id="53-model-registry">5.3 Model Registry</h3>
+<p>Models are registered under <code>stock-sentiment</code> with lifecycle stages:</p>
+<p><img alt="MLflow Models" src="screenshots/09_mlflow_models.png" /></p>
+<h3 id="54-reproducibility">5.4 Reproducibility</h3>
+<p>Every experiment can be reproduced from a <code>(git_commit_sha, mlflow_run_id)</code> pair. The API's <code>/model/info</code> endpoint surfaces both:</p>
+<pre><code class="language-json">{
+    &quot;name&quot;: &quot;stock-sentiment&quot;,
+    &quot;version&quot;: &quot;5&quot;,
+    &quot;stage&quot;: &quot;Production&quot;,
+    &quot;git_commit_sha&quot;: &quot;47af96ea0910b85d...&quot;,
+    &quot;mlflow_run_id&quot;: &quot;bcd649984faf43ef...&quot;,
+    &quot;data_hash&quot;: &quot;c29203c0347008d8722f...&quot;
+}
+</code></pre>
 <hr />
-<h2 id="8-model-deployment-serving">8. Model Deployment &amp; Serving</h2>
-<h3 id="81-three-container-topology">8.1 Three-container topology</h3>
-<p>As prescribed by the MLOps guidelines ("one for the API, one for the model server, and one for monitoring"):</p>
+<h2 id="6-deployment-serving">6. Deployment &amp; Serving</h2>
+<h3 id="61-how-serving-works">6.1 How serving works</h3>
+<p>The API gateway (FastAPI) does NOT load the model itself. It forwards requests to the model server which runs <code>mlflow models serve</code>. The model server loads whichever version is marked "Production" in the registry.</p>
+<p>This means:
+- Swapping models = changing a registry stage, not redeploying
+- The API stays up during model reloads
+- Rollback is just promoting an older version back to Production</p>
+<h3 id="62-health-checks">6.2 Health checks</h3>
+<ul>
+<li><code>GET /health</code> — liveness (always 200)</li>
+<li><code>GET /ready</code> — readiness (200 only if model server is reachable and a model is loaded)</li>
+</ul>
+<h3 id="63-api-endpoints">6.3 API endpoints</h3>
+<p>Here's the Swagger UI showing all implemented endpoints:</p>
+<p><img alt="API Swagger" src="screenshots/07_api_swagger.png" /></p>
+<h3 id="64-mlproject">6.4 MLproject</h3>
+<p>The <code>MLproject</code> file defines entry points for identical dev/test environments:</p>
+<pre><code class="language-yaml">name: stock-sentiment-mlops
+python_env: python_env.yaml
+entry_points:
+  ingest:   { command: &quot;python -m ssa_ingestion.pipeline&quot; }
+  features: { command: &quot;python -m ssa_features.pipeline&quot; }
+  train:    { command: &quot;python -m ssa_model.train ...&quot; }
+  evaluate: { command: &quot;python -m ssa_model.evaluate ...&quot; }
+</code></pre>
+<hr />
+<h2 id="7-monitoring-alerting">7. Monitoring &amp; Alerting</h2>
+<h3 id="71-prometheus">7.1 Prometheus</h3>
+<p>Prometheus scrapes 12 targets covering every component in the system:</p>
+<p><img alt="Prometheus Targets" src="screenshots/11_prometheus_targets.png" /></p>
+<p>Metrics collected include:
+- HTTP request rate, latency histograms, error counts (from the API)
+- Prediction class distribution
+- Model version currently serving
+- Feedback volume
+- Feature drift scores (KS p-values, Jensen-Shannon divergence)
+- Up/down probes for every service (via blackbox exporter)</p>
+<h3 id="72-alert-rules">7.2 Alert rules</h3>
+<p><img alt="Prometheus Alerts" src="screenshots/12_prometheus_alerts.png" /></p>
+<p>7 alert rules are configured:
+- API error rate &gt; 5% → Critical
+- API p95 latency &gt; 200ms → Warning
+- API down → Critical
+- Any component down (blackbox probe) → Critical
+- Numeric feature drift (KS p &lt; 0.05) → Warning
+- Categorical drift (JSD &gt; 0.1) → Warning
+- Prediction class ratio anomaly (|z| &gt; 2) → Warning</p>
+<h3 id="73-grafana-dashboards">7.3 Grafana dashboards</h3>
+<p><strong>API Overview dashboard</strong> — request rate, p95 latency, error rate:</p>
+<p><img alt="Grafana API" src="screenshots/13_grafana_api_overview.png" /></p>
+<p><strong>ML Monitoring dashboard</strong> — prediction distribution, drift scores, feedback rate, model version:</p>
+<p><img alt="Grafana ML" src="screenshots/14_grafana_ml_monitoring.png" /></p>
+<h3 id="74-alertmanager">7.4 Alertmanager</h3>
+<p>Drift alerts are routed to the Airflow retraining DAG via webhook:</p>
+<p><img alt="Alertmanager" src="screenshots/15_alertmanager_alerts.png" /></p>
+<h3 id="75-drift-detection">7.5 Drift detection</h3>
+<p>The drift exporter serves per-feature KS p-values and JSD scores:</p>
+<p><img alt="Drift Metrics" src="screenshots/16_drift_exporter_metrics.png" /></p>
+<p><strong>Note on drift alerts:</strong> The seed corpus has very narrow text-length distributions (templated text), so the KS test flags it as drift against the synthetic-normal baseline. This is expected — it proves the detection + alerting pipeline works, not that there's a real problem.</p>
+<hr />
+<h2 id="8-feedback-loop-retraining">8. Feedback Loop &amp; Retraining</h2>
+<h3 id="81-how-it-works">8.1 How it works</h3>
 <ol>
-<li><strong>api</strong> (FastAPI) — request validation, aggregation, feedback, Prometheus metrics</li>
-<li><strong>model-server</strong> (<code>mlflow models serve</code>) — loads the Production pyfunc, exposes <code>/invocations</code></li>
-<li><strong>monitoring</strong> (Prometheus + Grafana + Alertmanager + drift-exporter + blackbox-exporter)</li>
+<li>Every <code>/predict</code> call logs the prediction to Postgres (ticker, predicted label, confidence, model version)</li>
+<li>User submits ground truth via <code>/feedback</code> — the API joins it to the original prediction</li>
+<li>An hourly Airflow DAG aggregates feedback into accuracy metrics</li>
+<li>When drift alerts fire, Alertmanager webhooks to Airflow, triggering the retraining DAG</li>
+<li>The retraining DAG runs: refresh features → train → evaluate → auto-promote if better</li>
 </ol>
-<h3 id="82-health-checks">8.2 Health checks</h3>
-<ul>
-<li><code>GET /health</code> — liveness probe (always 200 if the process is running)</li>
-<li><code>GET /ready</code> — readiness probe (200 only if model-server is reachable AND a Production model is loaded)</li>
-</ul>
-<h3 id="83-rollback-mechanism">8.3 Rollback mechanism</h3>
-<p>Available via:
-- Frontend "Models" screen → "Roll to Prod" button
-- <code>POST /model/rollback</code> API endpoint
-- <code>scripts/rollback.py</code> CLI
-- GitHub Actions <code>rollback.yml</code> workflow (manual dispatch with dry-run guard)</p>
+<h3 id="82-feedback-in-postgres">8.2 Feedback in Postgres</h3>
+<pre><code> ticker | true_label | predicted_label
+--------+------------+-----------------
+ AAPL   | positive   | positive
+ AAPL   | positive   | positive
+</code></pre>
 <hr />
-<h2 id="9-monitoring-drift-detection-alerting">9. Monitoring, Drift Detection &amp; Alerting</h2>
-<h3 id="91-prometheus-instrumentation">9.1 Prometheus instrumentation</h3>
-<p>12 scrape targets covering every component:</p>
-<table>
-<thead>
-<tr>
-<th>Target type</th>
-<th>Services covered</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Native <code>/metrics</code></td>
-<td>api, drift-exporter, prometheus</td>
-</tr>
-<tr>
-<td>Blackbox HTTP probe</td>
-<td>mlflow, airflow, grafana, alertmanager, model-server, frontend, drift-exporter</td>
-</tr>
-<tr>
-<td>Blackbox TCP probe</td>
-<td>postgres</td>
-</tr>
-</tbody>
-</table>
-<h3 id="92-business-metrics-emitted">9.2 Business metrics emitted</h3>
-<ul>
-<li><code>predictions_total{sentiment=...}</code> — per-class prediction counts</li>
-<li><code>model_version_info{version, stage}</code> — currently serving model</li>
-<li><code>feedback_received_total{label=...}</code> — ground-truth volume</li>
-<li><code>feedback_agreement_rate</code> — real-world accuracy from feedback</li>
-<li><code>feature_drift_pvalue{feature=...}</code> — KS p-value per numeric feature</li>
-<li><code>feature_drift_jsd{feature=...}</code> — Jensen-Shannon divergence per categorical feature</li>
-<li><code>drift_detected{type=...}</code> — boolean per drift signal</li>
-</ul>
-<h3 id="93-alert-rules">9.3 Alert rules</h3>
-<table>
-<thead>
-<tr>
-<th>Alert</th>
-<th>Condition</th>
-<th>Severity</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>APIHighErrorRate</td>
-<td>5xx rate &gt; 5% for 2 min</td>
-<td>Critical</td>
-</tr>
-<tr>
-<td>APIHighLatencyP95</td>
-<td>p95 &gt; 200 ms for 5 min</td>
-<td>Warning</td>
-</tr>
-<tr>
-<td>APIDown</td>
-<td><code>up == 0</code> for 1 min</td>
-<td>Critical</td>
-</tr>
-<tr>
-<td>ComponentDown</td>
-<td>Blackbox probe fails for 2 min</td>
-<td>Critical</td>
-</tr>
-<tr>
-<td>FeatureDriftNumeric</td>
-<td>KS p-value &lt; 0.05 for 10 min</td>
-<td>Warning</td>
-</tr>
-<tr>
-<td>FeatureDriftCategorical</td>
-<td>JSD &gt; 0.1 for 10 min</td>
-<td>Warning</td>
-</tr>
-<tr>
-<td>PredictionClassRatioAnomaly</td>
-<td></td>
-<td>z-score</td>
-</tr>
-</tbody>
-</table>
-<h3 id="94-grafana-dashboards">9.4 Grafana dashboards</h3>
-<ol>
-<li><strong>API Overview</strong> — request rate, p95 latency, error rate stat</li>
-<li><strong>ML Monitoring</strong> — prediction distribution donut, model version, feedback rate, drift p-value + JSD timeseries, drift-detected boolean, drift job staleness</li>
-</ol>
+<h2 id="9-frontend">9. Frontend</h2>
+<h3 id="91-technology">9.1 Technology</h3>
+<p>React 18 + TypeScript + Vite + Tailwind CSS. Multi-stage Docker build (Node builder → nginx runtime). The API URL is injected at container boot time so the same image works anywhere.</p>
+<h3 id="92-screens">9.2 Screens</h3>
+<p><strong>Analyze</strong> — the main screen. Enter a ticker, get a prediction:</p>
+<p><img alt="Analyze Empty" src="screenshots/01_frontend_analyze_empty.png" /></p>
+<p><img alt="Analyze Result" src="screenshots/02_frontend_analyze_result.png" /></p>
+<p><strong>Pipelines</strong> — visualises the ML pipeline with links to all MLOps tools:</p>
+<p><img alt="Pipelines" src="screenshots/03_frontend_pipelines.png" /></p>
+<p><strong>Models</strong> — registry listing with rollback:</p>
+<p><img alt="Models" src="screenshots/04_frontend_models.png" /></p>
+<p><strong>Health</strong> — live service status grid:</p>
+<p><img alt="Health" src="screenshots/05_frontend_health.png" /></p>
+<p><strong>User Manual</strong> — in-app guide for non-technical users:</p>
+<p><img alt="Manual" src="screenshots/06_frontend_manual.png" /></p>
 <hr />
-<h2 id="10-feedback-loop-retraining">10. Feedback Loop &amp; Retraining</h2>
-<h3 id="101-feedback-collection">10.1 Feedback collection</h3>
-<p>Every <code>/predict</code> response includes a <code>request_id</code>. The user can submit ground-truth via <code>/feedback</code> with that ID. The API joins the feedback to the original prediction in Postgres, populating <code>predicted_label</code> automatically.</p>
-<h3 id="102-feedback-aggregation">10.2 Feedback aggregation</h3>
-<p>An hourly Airflow DAG (<code>ssa_feedback_metrics</code>) queries the joined predictions + feedback tables and computes:
-- Total feedback count
-- Agreement rate (predicted == true)
-- Per-model-version accuracy</p>
-<p>These are emitted as Prometheus metrics via the drift-exporter.</p>
-<h3 id="103-automated-retraining">10.3 Automated retraining</h3>
-<p>When drift alerts fire, Alertmanager webhooks to the Airflow REST API, triggering the <code>ssa_retraining</code> DAG:
-1. Refresh features from the latest validated data
-2. Train a new model (logged to MLflow)
-3. Evaluate on holdout test set
-4. Auto-promote to Production if it beats the incumbent by the configured delta</p>
-<hr />
-<h2 id="11-frontend-application">11. Frontend Application</h2>
-<h3 id="111-technology">11.1 Technology</h3>
-<p>React 18 + TypeScript + Vite + Tailwind CSS, served by nginx in a multi-stage Docker build (Node 20 builder → nginx:alpine runtime). Final bundle: 192 KB JS + 19 KB CSS.</p>
-<h3 id="112-screens">11.2 Screens</h3>
-<table>
-<thead>
-<tr>
-<th>Screen</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Analyze</strong></td>
-<td>Ticker input → sentiment prediction with confidence, probability bars, contributing snippets, feedback buttons</td>
-</tr>
-<tr>
-<td><strong>Pipelines</strong></td>
-<td>7-stage pipeline visualisation, live links to Airflow/MLflow/Prometheus/Grafana, scrape target status</td>
-</tr>
-<tr>
-<td><strong>Models</strong></td>
-<td>Registry listing with stage badges, macro-F1, one-click rollback</td>
-</tr>
-<tr>
-<td><strong>Health</strong></td>
-<td>Live 6-service grid, auto-refreshes every 15 s</td>
-</tr>
-<tr>
-<td><strong>User Manual</strong></td>
-<td>8-section in-app walkthrough with embedded screenshots</td>
-</tr>
-</tbody>
-</table>
-<h3 id="113-ux-design-principles">11.3 UX design principles</h3>
-<ul>
-<li>Foolproof input validation with clear error messages</li>
-<li>Empty, loading, and error states for every async operation</li>
-<li>Consistent colour palette (Tailwind brand tokens)</li>
-<li>Responsive grid layout</li>
-<li>Accessible labels and keyboard navigation</li>
-<li>"Not financial advice" disclaimer in footer</li>
-</ul>
-<hr />
-<h2 id="12-cicd-version-control">12. CI/CD &amp; Version Control</h2>
-<h3 id="121-version-control">12.1 Version control</h3>
+<h2 id="10-version-control-cicd">10. Version Control &amp; CI/CD</h2>
+<h3 id="101-version-control">10.1 Version control</h3>
 <table>
 <thead>
 <tr>
@@ -732,7 +364,7 @@ li { margin-bottom: 0.3em; }
 </tr>
 <tr>
 <td>Git LFS</td>
-<td>Model binaries (<code>.joblib</code>, <code>.bin</code>, <code>.safetensors</code>, <code>.pkl</code>, <code>.pt</code>, <code>.pth</code>, <code>.h5</code>)</td>
+<td>Model binaries (.joblib, .bin, .safetensors, .pkl, .pt)</td>
 </tr>
 <tr>
 <td>DVC</td>
@@ -740,81 +372,74 @@ li { margin-bottom: 0.3em; }
 </tr>
 </tbody>
 </table>
-<h3 id="122-github-actions-workflows">12.2 GitHub Actions workflows</h3>
-<table>
-<thead>
-<tr>
-<th>Workflow</th>
-<th>Trigger</th>
-<th>Jobs</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ci.yml</code></td>
-<td>Push + PR to <code>main</code></td>
-<td>Python lint/type/test matrix (3.10, 3.11); frontend TS build; docker compose validate + build</td>
-</tr>
-<tr>
-<td><code>dvc.yml</code></td>
-<td>Push touching data/feature code</td>
-<td><code>dvc repro</code> first 5 stages, validate outputs, export DAG + reports as artifacts</td>
-</tr>
-<tr>
-<td><code>rollback.yml</code></td>
-<td>Manual dispatch</td>
-<td>Promote target version to Production with dry-run guard</td>
-</tr>
-</tbody>
-</table>
-<h3 id="123-dvc-as-ci">12.3 DVC as CI</h3>
-<p>The DVC DAG (<code>dvc.yaml</code>) is the CI pipeline. <code>dvc repro</code> validates the full lineage from raw data to evaluated model. The DAG is exported as a DOT file and published as a CI artifact.</p>
+<h3 id="102-dvc-dag">10.2 DVC DAG</h3>
+<p>The DVC DAG represents the CI pipeline:</p>
+<pre><code>               +--------+
+               | ingest |
+               +--------+
+                    *
+               +----------+
+               | validate |
+               +----------+
+              **          **
++---------------+      +----------+
+| eda_baselines |      | features |
++---------------+      +----------+
+     *                   *       *
+  +-------+          +-------+
+  | drift |          | train |
+  +-------+          +-------+
+                          *
+                     +----------+
+                     | evaluate |
+                     +----------+
+</code></pre>
+<h3 id="103-github-actions">10.3 GitHub Actions</h3>
+<p>Three CI workflows:
+- <code>ci.yml</code> — lint + type-check + unit tests (Python 3.10/3.11 matrix) + frontend build + docker compose validation
+- <code>dvc.yml</code> — runs <code>dvc repro</code> on data/feature code changes, exports DAG as artifact
+- <code>rollback.yml</code> — manual dispatch to promote a model version to Production</p>
 <hr />
-<h2 id="13-testing-acceptance">13. Testing &amp; Acceptance</h2>
-<h3 id="131-test-levels">13.1 Test levels</h3>
+<h2 id="11-testing">11. Testing</h2>
+<h3 id="111-test-suite">11.1 Test suite</h3>
 <table>
 <thead>
 <tr>
 <th>Level</th>
 <th>Count</th>
-<th>Tool</th>
-<th>Scope</th>
+<th>What it covers</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Unit</td>
 <td>52</td>
-<td>pytest</td>
-<td>Pure functions in every <code>ssa_*</code> package</td>
+<td>Schemas, cleaning, vectorizer, metrics, reproducibility, drift, inference</td>
 </tr>
 <tr>
 <td>Integration</td>
 <td>2</td>
-<td>pytest + docker</td>
-<td>Compose config validation</td>
+<td>Docker compose config validation</td>
 </tr>
 <tr>
 <td>Contract</td>
 <td>13</td>
-<td>pytest + httpx</td>
-<td>Live API responses vs LLD contract</td>
+<td>Every API endpoint response vs LLD spec</td>
 </tr>
 <tr>
 <td>End-to-end</td>
 <td>11</td>
-<td>pytest + httpx</td>
-<td>Full user journey through the stack</td>
+<td>Full user journey through the live stack</td>
 </tr>
 <tr>
 <td><strong>Total</strong></td>
 <td><strong>78</strong></td>
 <td></td>
-<td></td>
 </tr>
 </tbody>
 </table>
-<h3 id="132-acceptance-criteria-results">13.2 Acceptance criteria results</h3>
+<h3 id="112-acceptance-criteria">11.2 Acceptance criteria</h3>
+<p>All 4 criteria pass:</p>
 <table>
 <thead>
 <tr>
@@ -826,7 +451,7 @@ li { margin-bottom: 0.3em; }
 </thead>
 <tbody>
 <tr>
-<td><code>/predict</code> p95 latency</td>
+<td>/predict p95 latency</td>
 <td>&lt; 200 ms</td>
 <td>48–193 ms</td>
 <td>✅ PASS</td>
@@ -838,7 +463,7 @@ li { margin-bottom: 0.3em; }
 <td>✅ PASS</td>
 </tr>
 <tr>
-<td><code>/ready</code> within timeout</td>
+<td>/ready within timeout</td>
 <td>&lt; 30 s</td>
 <td>reached</td>
 <td>✅ PASS</td>
@@ -851,214 +476,121 @@ li { margin-bottom: 0.3em; }
 </tr>
 </tbody>
 </table>
-<p>Full test report with per-file breakdown: <a href="test-report.md"><code>docs/test-report.md</code></a></p>
 <hr />
-<h2 id="14-results-evidence">14. Results &amp; Evidence</h2>
-<p>All screenshots and CLI proofs are in <a href="walkthrough.md"><code>docs/walkthrough.md</code></a>. Key highlights:</p>
+<h2 id="12-challenges-faced">12. Challenges Faced</h2>
 <table>
 <thead>
 <tr>
-<th>Evidence</th>
+<th>Problem</th>
+<th>What happened</th>
+<th>How I fixed it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MLflow version mismatch</td>
+<td>Client v3.11 called endpoints server v2.10 didn't have</td>
+<td>Pinned both to 3.11.1</td>
+</tr>
+<tr>
+<td>MLflow artifact writes failed</td>
+<td>Client tried to write to container filesystem</td>
+<td>Switched to proxied artifact mode</td>
+</tr>
+<tr>
+<td>sklearn version mismatch</td>
+<td>Model pickled with 1.8, served with 1.7</td>
+<td>Aligned versions in Dockerfile</td>
+</tr>
+<tr>
+<td>MLflow DNS rebinding protection</td>
+<td>Inter-container calls rejected with 403</td>
+<td>Added <code>--allowed-hosts</code> flag</td>
+</tr>
+<tr>
+<td>/predict latency at 1.8s</td>
+<td>Per-call Postgres + MLflow registry lookups</td>
+<td>Added caching + connection pooling → 48ms</td>
+</tr>
+<tr>
+<td>Airflow missing Python deps</td>
+<td>Tasks crashed on import</td>
+<td>Added <code>_PIP_ADDITIONAL_REQUIREMENTS</code></td>
+</tr>
+<tr>
+<td>Frontend nginx stale DNS</td>
+<td>502 after API container recreate</td>
+<td>Restart frontend to re-resolve</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="13-limitations-future-work">13. Limitations &amp; Future Work</h2>
+<h3 id="whats-limited-right-now">What's limited right now</h3>
+<ul>
+<li><strong>Seed data only</strong> — the 300-record templated corpus gives perfect F1 (1.0) because the model memorises 8 templates. Real metrics need Financial PhraseBank / FiQA data.</li>
+<li><strong>No live API keys configured</strong> — NewsAPI/Reddit adapters exist but need keys</li>
+<li><strong>No TLS</strong> — all inter-container traffic is HTTP (acceptable for local-only)</li>
+<li><strong>No authentication</strong> — single-tenant demo</li>
+</ul>
+<h3 id="what-id-do-next">What I'd do next</h3>
+<ul>
+<li>Fine-tune FinBERT on real financial sentiment data</li>
+<li>Build a custom Airflow image with deps baked in (eliminates 3-5 min boot)</li>
+<li>Migrate from MLflow stages to aliases (stages are deprecated in 3.x)</li>
+<li>Add TLS between services</li>
+</ul>
+<hr />
+<h2 id="14-documentation-deliverables">14. Documentation Deliverables</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Required document</th>
 <th>Location</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>16 UI screenshots (frontend, MLflow, Airflow, Grafana, Prometheus, Alertmanager)</td>
-<td><code>docs/screenshots/</code></td>
-</tr>
-<tr>
-<td>20+ CLI text proofs (docker ps, dvc dag, git lfs, API responses, Prometheus metrics, Postgres queries)</td>
-<td><code>docs/screenshots/cli/</code></td>
-</tr>
-<tr>
-<td>Executed EDA notebook with plots</td>
-<td><code>notebooks/eda.ipynb</code></td>
-</tr>
-<tr>
-<td>Test report with 78/78 pass + acceptance criteria</td>
-<td><code>docs/test-report.md</code></td>
-</tr>
-<tr>
-<td>DVC DAG DOT export</td>
-<td><code>docs/diagrams/dvc-dag.dot</code></td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="15-challenges-mitigations">15. Challenges &amp; Mitigations</h2>
-<table>
-<thead>
-<tr>
-<th>Challenge</th>
-<th>Impact</th>
-<th>Resolution</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>MLflow 2.10 → 3.11 version mismatch</td>
-<td>Client called endpoints server didn't have (404s)</td>
-<td>Pinned both to 3.11.1; documented in ADR 0001</td>
-</tr>
-<tr>
-<td>MLflow artifact writes failed (<code>OSError: Read-only file system</code>)</td>
-<td>Training couldn't log artifacts</td>
-<td>Switched to proxied artifact mode (<code>--default-artifact-root mlflow-artifacts:/</code>); documented in ADR 0002</td>
-</tr>
-<tr>
-<td>sklearn 1.7 → 1.8 removed <code>multi_class</code> kwarg</td>
-<td>Training crashed</td>
-<td>Dropped the kwarg; pinned serving image to match training sklearn version</td>
-</tr>
-<tr>
-<td>MLflow pyfunc receives numpy arrays, not strings</td>
-<td>Model-server 500'd on inference</td>
-<td>Rewrote <code>_coerce_to_texts</code> to handle DataFrames, numpy scalars, and dict-wrapped inputs</td>
-</tr>
-<tr>
-<td>MLflow 3.x DNS rebinding protection</td>
-<td>Inter-container calls rejected with 403</td>
-<td>Added <code>--allowed-hosts</code> with compose service names + Docker bridge subnets</td>
-</tr>
-<tr>
-<td>Airflow <code>_PIP_ADDITIONAL_REQUIREMENTS</code> slow on every boot</td>
-<td>3–5 min startup per container</td>
-<td>Accepted for dev; production would use a custom Airflow image with deps baked in</td>
-</tr>
-<tr>
-<td><code>/predict</code> p95 at 1.8 s due to per-call Postgres + MLflow lookups</td>
-<td>Failed acceptance criteria</td>
-<td>Added 5-second registry cache + persistent Postgres connection; p95 dropped to 48 ms</td>
-</tr>
-<tr>
-<td>Frontend nginx cached stale API container IP after recreate</td>
-<td>502 on proxied calls</td>
-<td><code>docker compose restart frontend</code> re-resolves; permanent fix via nginx <code>resolver</code> directive</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="16-limitations-future-work">16. Limitations &amp; Future Work</h2>
-<h3 id="161-current-limitations">16.1 Current limitations</h3>
-<ul>
-<li><strong>Seed data only</strong>: The 300-record templated corpus produces perfect F1 (1.0) because the model memorises 8 templates. Real-world metrics require Financial PhraseBank / FiQA data.</li>
-<li><strong>No live data sources configured</strong>: NewsAPI, Finnhub, and Reddit adapters exist but require API keys not committed to the repo.</li>
-<li><strong>No TLS between services</strong>: All inter-container communication is HTTP. Acceptable for local-only deployment; documented as a security exception.</li>
-<li><strong>No user authentication</strong>: Single-tenant demo; the rollback endpoint is restricted to local-network callers only.</li>
-<li><strong>Drift alerts fire on seed data</strong>: The KS test flags the narrow templated text distribution as drift against the synthetic-normal baseline. This is expected and proves the alerting pipeline rather than indicating a real problem.</li>
-</ul>
-<h3 id="162-future-work">16.2 Future work</h3>
-<ul>
-<li><strong>Phase 10</strong>: Fine-tune FinBERT on Financial PhraseBank + FiQA for realistic sentiment quality</li>
-<li><strong>Custom Airflow image</strong>: Bake Python deps into the image to eliminate the 3–5 min boot-time pip install</li>
-<li><strong>MLflow aliases</strong>: Migrate from deprecated stage-based promotion to alias-based (<code>@production</code>) per MLflow 3.x roadmap</li>
-<li><strong>Horizontal scaling</strong>: Gunicorn workers + <code>docker compose --scale model-server=N</code> + load balancer</li>
-<li><strong>TLS</strong>: Self-signed CA for inter-container encryption</li>
-<li><strong>Weak supervision</strong>: Label unlabelled live data for continuous learning</li>
-</ul>
-<hr />
-<h2 id="17-conclusion">17. Conclusion</h2>
-<p>This project demonstrates a complete MLOps lifecycle for a stock sentiment analysis application. Every stage — from data ingestion and validation through model training, deployment, monitoring, and retraining — is automated, version-controlled, and observable. The system runs entirely on local infrastructure using Docker Compose, with 12 services orchestrated on a shared network.</p>
-<p>The project satisfies all 5 documentation requirements (architecture diagram, HLD, LLD, test plan + report, user manual), all 4 acceptance criteria (latency, error rate, readiness, model quality), and provides visible evidence for every rubric item across Demonstration, Software Engineering, MLOps Implementation, and Viva preparation.</p>
-<hr />
-<h2 id="18-appendices">18. Appendices</h2>
-<h3 id="a-documentation-index">A. Documentation index</h3>
-<table>
-<thead>
-<tr>
-<th>Document</th>
-<th>Path</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Architecture diagram + block explanations</td>
+<td>1</td>
+<td>Architecture diagram with block explanations</td>
 <td><code>docs/architecture.md</code></td>
 </tr>
 <tr>
-<td>High-level design</td>
+<td>2</td>
+<td>High-level design with rationale</td>
 <td><code>docs/HLD.md</code></td>
 </tr>
 <tr>
-<td>Low-level design (API contracts)</td>
+<td>3</td>
+<td>Low-level design with endpoint I/O specs</td>
 <td><code>docs/LLD.md</code></td>
 </tr>
 <tr>
-<td>Test plan + test case matrix</td>
+<td>4</td>
+<td>Test plan &amp; test cases</td>
 <td><code>docs/test-plan.md</code></td>
 </tr>
 <tr>
-<td>Test report (78 tests, all pass)</td>
+<td>5</td>
+<td>User manual</td>
+<td><code>docs/user-manual.md</code> + in-app <code>/manual</code> screen</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Test report with pass/fail counts</td>
 <td><code>docs/test-report.md</code></td>
 </tr>
 <tr>
-<td>User manual</td>
-<td><code>docs/user-manual.md</code></td>
-</tr>
-<tr>
+<td>—</td>
 <td>Acceptance criteria</td>
 <td><code>docs/acceptance-criteria.md</code></td>
 </tr>
 <tr>
-<td>Pipeline performance</td>
-<td><code>docs/performance.md</code></td>
-</tr>
-<tr>
-<td>Walkthrough with screenshots</td>
-<td><code>docs/walkthrough.md</code></td>
-</tr>
-<tr>
-<td>Phase log (problems faced)</td>
-<td><code>docs/phase-log.md</code></td>
-</tr>
-<tr>
-<td>ADR: MLflow 3.x migration</td>
-<td><code>docs/adr/0001-mlflow-3x.md</code></td>
-</tr>
-<tr>
-<td>ADR: Artifact proxying</td>
-<td><code>docs/adr/0002-mlflow-artifact-proxying.md</code></td>
-</tr>
-<tr>
-<td>Project conventions</td>
-<td><code>docs/conventions.md</code></td>
+<td>—</td>
+<td>This project report</td>
+<td><code>docs/project-report.md</code></td>
 </tr>
 </tbody>
-</table>
-<h3 id="b-repository-layout">B. Repository layout</h3>
-<pre><code>.
-├── docs/                    # All design docs, diagrams, screenshots, references
-├── src/
-│   ├── ssa_ingestion/       # News + social data ingestion + validation + EDA
-│   ├── ssa_features/        # Feature engineering (versioned independently)
-│   ├── ssa_model/           # Training, evaluation, registry, pyfunc wrapper
-│   ├── ssa_api/             # FastAPI gateway
-│   └── ssa_monitoring/      # Drift detection, feedback metrics
-├── frontend/                # React + Vite + Tailwind UI
-├── airflow/dags/            # Ingestion, drift, feedback, retraining DAGs
-├── docker/                  # Dockerfiles per service
-├── prometheus/              # Scrape config + alert rules
-├── grafana/                 # Dashboard JSON + datasource provisioning
-├── alertmanager/            # Alertmanager routing config
-├── tests/                   # Unit, integration, contract, e2e tests
-├── notebooks/               # EDA notebook (executed with outputs)
-├── scripts/                 # Rollback, acceptance verifier, report generator, capture tools
-├── artifacts/               # DVC-tracked outputs (baselines, metrics, vectorizer, drift)
-├── data/seed/               # Committed seed corpus
-├── .github/workflows/       # CI, DVC pipeline, rollback workflows
-├── dvc.yaml                 # Pipeline DAG
-├── params.yaml              # Central hyperparameters
-├── MLproject                # MLflow project definition
-├── docker-compose.yml       # 12-service orchestration
-└── Makefile                 # Common dev targets
-</code></pre>
-<h3 id="c-how-to-run">C. How to run</h3>
-<pre><code class="language-bash"># Prerequisites: Docker (or Colima), Node.js, Python 3.10+
-colima start --cpu 4 --memory 8 --disk 60   # if using Colima
-make up                                       # docker compose up -d --build
-# Wait ~3 min for Airflow to install deps on first boot
-# Then visit http://localhost:3000
-</code></pre>
-</body>
+</table></body>
 </html>
