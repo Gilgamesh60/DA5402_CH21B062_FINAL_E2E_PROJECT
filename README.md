@@ -105,6 +105,3 @@ Once up, visit:
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3001 (admin/admin)
 
-## License
-
-Course project — not for redistribution.
