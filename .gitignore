@@ -39,6 +39,7 @@ htmlcov/
 .nox/
 coverage.xml
 *.cover
+artifacts/junit.xml
 
 # Jupyter
 .ipynb_checkpoints/
@@ -78,8 +79,13 @@ logs/
 node_modules/
 frontend/dist/
 frontend/.vite/
+frontend/tsconfig.tsbuildinfo
 
 # DVC
 /.dvc/cache
 /.dvc/tmp
 /.dvc/plots
+
+# Generated report intermediates
+docs/project-report.html
+docs/screenshots/cli/

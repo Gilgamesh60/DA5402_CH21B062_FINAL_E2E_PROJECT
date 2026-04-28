@@ -1,9 +1,0 @@
-http_requests_total{method="GET",path="/metrics",status="200"} 387.0
-http_requests_total{method="GET",path="/health",status="200"} 307.0
-http_requests_total{method="POST",path="/model/rollback",status="200"} 1.0
-http_requests_total{method="GET",path="/model/info",status="200"} 2.0
-http_requests_total{method="POST",path="/predict",status="200"} 9.0
-http_requests_total{method="GET",path="/model/versions",status="200"} 1.0
-predictions_total{sentiment="negative"} 81.0
-predictions_total{sentiment="positive"} 171.0
-predictions_total{sentiment="neutral"} 108.0

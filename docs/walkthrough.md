@@ -48,7 +48,6 @@ Twelve services, all healthy:
 $ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 ```
 
-See [`screenshots/cli/docker_ps.txt`](screenshots/cli/docker_ps.txt). The services are: postgres, mlflow, model-server, api, airflow-webserver, airflow-scheduler, prometheus, grafana, alertmanager, frontend, drift-exporter, blackbox-exporter.
 
 **Rubric coverage**
 - **Software Packaging [4]** — Docker + docker-compose + separate services all visible
@@ -300,7 +299,6 @@ DVC DAG — shows ingest → validate → eda_baselines + features → train →
 $ dvc dag
 ```
 
-See [`screenshots/cli/dvc_dag.txt`](screenshots/cli/dvc_dag.txt).
 
 Git LFS tracked patterns:
 
@@ -308,7 +306,6 @@ Git LFS tracked patterns:
 $ git lfs track
 ```
 
-See [`screenshots/cli/git_lfs.txt`](screenshots/cli/git_lfs.txt).
 
 Git history — conventional commits per phase:
 
@@ -316,7 +313,6 @@ Git history — conventional commits per phase:
 $ git log --oneline -n 15
 ```
 
-See [`screenshots/cli/git_log.txt`](screenshots/cli/git_log.txt).
 
 DVC metrics — throughput + accuracy surfaced as CI metrics:
 
@@ -324,7 +320,6 @@ DVC metrics — throughput + accuracy surfaced as CI metrics:
 $ dvc metrics show
 ```
 
-See [`screenshots/cli/dvc_metrics.txt`](screenshots/cli/dvc_metrics.txt).
 
 ### 17.2 API contract proof (Implementation [2])
 
@@ -334,7 +329,6 @@ Real `/predict` response — matches LLD exactly:
 $ curl -X POST http://localhost:8000/predict -d '{"ticker":"AAPL"}'
 ```
 
-See [`screenshots/cli/api_predict.txt`](screenshots/cli/api_predict.txt).
 
 `/model/info` — reproducibility surface:
 
@@ -342,7 +336,6 @@ See [`screenshots/cli/api_predict.txt`](screenshots/cli/api_predict.txt).
 $ curl http://localhost:8000/model/info
 ```
 
-See [`screenshots/cli/api_model_info.txt`](screenshots/cli/api_model_info.txt). The response includes `git_commit_sha` and `mlflow_run_id` — a live demonstration that any prediction can be traced to a specific `(git, mlflow)` pair.
 
 `/model/versions` — full registry listing:
 
@@ -350,7 +343,6 @@ See [`screenshots/cli/api_model_info.txt`](screenshots/cli/api_model_info.txt). 
 $ curl http://localhost:8000/model/versions
 ```
 
-See [`screenshots/cli/api_model_versions.txt`](screenshots/cli/api_model_versions.txt).
 
 ### 17.3 Feedback loop (MLOps guidelines)
 
@@ -360,7 +352,6 @@ Feedback rows joined to predicted labels in Postgres:
 $ psql -c "SELECT ticker, true_label, predicted_label FROM feedback ORDER BY received_at DESC LIMIT 5"
 ```
 
-See [`screenshots/cli/postgres_feedback.txt`](screenshots/cli/postgres_feedback.txt).
 
 ### 17.4 Prometheus metric stream (Exporter [2])
 
@@ -370,7 +361,6 @@ Business-level metrics live in `/metrics`:
 $ curl http://localhost:8000/metrics | grep -E "^(predictions_total|model_version_info|feedback_received_total|feature_drift|drift_detected)"
 ```
 
-See [`screenshots/cli/prometheus_metrics.txt`](screenshots/cli/prometheus_metrics.txt).
 
 Active scrape targets:
 
@@ -378,7 +368,6 @@ Active scrape targets:
 $ curl http://localhost:9090/api/v1/targets?state=active
 ```
 
-See [`screenshots/cli/prometheus_targets.txt`](screenshots/cli/prometheus_targets.txt).
 
 ### 17.5 Test report (Testing [1])
 
@@ -388,7 +377,6 @@ Summary of the 78-test suite + acceptance criteria (all pass):
 $ head -60 docs/test-report.md
 ```
 
-See [`screenshots/cli/test_report_head.txt`](screenshots/cli/test_report_head.txt). Full report at [`test-report.md`](test-report.md).
 
 ### 17.6 Pipeline performance (Data Engineering [2])
 
@@ -401,7 +389,6 @@ Rubric asks "What is the throughput and speed of the data engineering pipeline?"
 | eda_baselines | 300 | < 0.1 s | — |
 | features (split + fit + transform) | 300 → 209 / 30 / 61 | < 0.2 s | — |
 
-Raw numbers from [`screenshots/cli/ingestion_report.txt`](screenshots/cli/ingestion_report.txt) and [`screenshots/cli/validation_report.txt`](screenshots/cli/validation_report.txt). Full performance analysis in [`docs/performance.md`](performance.md).
 
 At seed scale, pandas parquet serialisation dominates. At live scale, the pipeline becomes I/O-bound on external API latency — the fix is `ThreadPoolExecutor` on source fetches (trivially parallel HTTP).
 
@@ -433,7 +420,6 @@ entry_points:
   main:      { command: "python -m ssa_model.train" }
 ```
 
-Verbatim copies of both files are in [`screenshots/cli/MLproject.txt`](screenshots/cli/MLproject.txt) and [`screenshots/cli/python_env.yaml.txt`](screenshots/cli/python_env.yaml.txt).
 
 ### 17.9 Logging + exception handling (Implementation [2])
 
@@ -444,7 +430,6 @@ Verbatim copies of both files are in [`screenshots/cli/MLproject.txt`](screensho
  "path": "/predict", "status": 200, "latency_ms": 85}
 ```
 
-Live sample captured in [`screenshots/cli/api_logs_sample.txt`](screenshots/cli/api_logs_sample.txt).
 
 **Error response** — when input violates the schema the API returns a typed error payload (not a stacktrace), proving exception handling is routed through a dedicated handler:
 
@@ -463,7 +448,6 @@ $ curl -X POST http://localhost:8000/predict \
 }
 ```
 
-Live response captured in [`screenshots/cli/api_error_response.txt`](screenshots/cli/api_error_response.txt).
 
 Every endpoint wraps handlers with a top-level exception handler that logs with context and returns a stable error code — never a raw stack trace.
 
@@ -477,7 +461,6 @@ Three workflow files in `.github/workflows/`:
 | `dvc.yml` | push/PR touching data or feature code | Runs `dvc repro ingest validate eda_baselines features drift`, validates expected outputs exist, exports `dvc-dag.dot` and all reports as build artifacts |
 | `rollback.yml` | manual `workflow_dispatch` | Promotes a target model version to Production with dry-run guard + summary markdown |
 
-Verbatim workflow files in [`screenshots/cli/github_workflow_ci.yml.txt`](screenshots/cli/github_workflow_ci.yml.txt), [`screenshots/cli/github_workflow_dvc.yml.txt`](screenshots/cli/github_workflow_dvc.yml.txt), [`screenshots/cli/github_workflow_rollback.yml.txt`](screenshots/cli/github_workflow_rollback.yml.txt).
 
 The DVC pipeline itself — the actual CI artefact the rubric asks for — is validated every run of `dvc repro`, which is captured in [§17.1](#171-git--dvc--git-lfs-scm--ci-2).
 
@@ -501,15 +484,5 @@ The DVC pipeline itself — the actual CI artefact the rubric asks for — is va
 | **Total** | **35** | |
 
 ---
-
-## How to regenerate this walkthrough
-
-From the repo root with the stack running:
-
-```bash
-.venv/bin/python scripts/capture_walkthrough.py   # UI screenshots
-./scripts/capture_cli_proofs.sh                    # CLI outputs
-# then re-open this document
-```
 
 All screenshots are reproducible from the running stack + current code.
