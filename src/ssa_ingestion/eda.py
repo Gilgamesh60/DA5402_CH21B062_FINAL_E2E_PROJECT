@@ -50,7 +50,7 @@ def _categorical_distribution(series: pd.Series) -> dict[str, float]:
 
 
 def compute_baselines(df: pd.DataFrame) -> dict[str, Any]:
-    """Build the baselines dict used by Phase 6 drift detection."""
+    """Build the baselines dict used by drift detection."""
     text_lengths = df["text"].astype(str).str.len()
     word_counts = df["text"].astype(str).str.split().str.len()
 

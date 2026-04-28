@@ -2,7 +2,7 @@
 
 Generated: **2026-04-27 18:54 UTC**
 
-This report is machine-generated from `artifacts/junit.xml` and `artifacts/acceptance_report.json`. Regenerate with `make test-report`.
+This report is generated from `artifacts/junit.xml` and `artifacts/acceptance_report.json`. Regenerate with `make test-report`.
 
 ## Summary
 
@@ -41,10 +41,10 @@ Generated: 2026-04-27T18:53:59.821576+00:00
 
 | Criterion | Target | Actual | Status |
 |---|---|---|---|
-| predict_p95_latency | 200 | 192.9 | ✅ PASS |
-| predict_error_rate | 5.0 | 0.0 | ✅ PASS |
-| ready_within_timeout | 30 | reached | ✅ PASS |
-| model_macro_f1 | 0.75 | 1.0 | ✅ PASS |
+| predict_p95_latency | 200 | 192.9 | PASS |
+| predict_error_rate | 5.0 | 0.0 | PASS |
+| ready_within_timeout | 30 | reached | PASS |
+| model_macro_f1 | 0.75 | 1.0 | PASS |
 
 ### Raw /predict timings
 

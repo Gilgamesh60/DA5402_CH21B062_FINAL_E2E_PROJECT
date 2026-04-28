@@ -1,4 +1,4 @@
-"""FastAPI gateway — Phase 5 implementation of the LLD contract.
+"""FastAPI gateway — implements the LLD contract.
 
 Routes implemented:
     /health, /ready, /metrics
@@ -101,7 +101,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(
     title="Stock Sentiment API",
     version="0.5.0",
-    description="Phase 5 gateway implementing the LLD contract.",
+    description="gateway — LLD contract implementation.",
     lifespan=lifespan,
 )
 app.add_middleware(RequestContextMiddleware)
@@ -407,7 +407,7 @@ async def predict(
     resp.request_id = request.state.request_id
     resp.latency_ms = int((time.perf_counter() - t0) * 1000)
 
-    # Log for feedback-join in Phase 9 retraining
+    # Log for feedback-join in retraining
     predictions_repo.insert(
         prediction_request_id=resp.request_id,
         ticker=resp.ticker,
@@ -474,7 +474,7 @@ async def feedback(
 ) -> FeedbackResponse:
     # Look up the predicted label so real-world accuracy can be computed
     # without a follow-up join every time. Best-effort — if the lookup
-    # fails (e.g. prediction came from before Phase 9), we still accept
+    # fails (e.g. prediction predates the predictions table), we still accept
     # the feedback and leave predicted_label NULL.
     predicted = None
     try:

@@ -6,4 +6,4 @@ every persisted vectorizer, so downstream code can detect feature/model
 version mismatches.
 """
 
-__version__ = "0.2.0"  # bumped from 0.1.0 in Phase 3 when real features landed
+__version__ = "0.2.0"  # bumped from 0.1.0 in when real features landed

@@ -61,8 +61,8 @@ Every MLflow run records:
 Any run can be reproduced from `(git_commit_sha, mlflow_run_id)` alone.
 
 ### 4.6 Model choice
-- **Phase 4 baseline**: TF-IDF + Logistic Regression. Proves the pipeline, fast to train, easy to explain.
-- **Phase 10 upgrade**: FinBERT or DistilBERT fine-tuned on financial sentiment data. Dynamically quantized via `torch.quantization.quantize_dynamic` to meet the 200 ms latency budget on CPU-only local hardware.
+- **Baseline**: TF-IDF + Logistic Regression. Proves the pipeline, fast to train, easy to explain.
+- **Upgrade path**: FinBERT or DistilBERT fine-tuned on financial sentiment data. Dynamically quantized via `torch.quantization.quantize_dynamic` to meet the 200 ms latency budget on CPU-only local hardware.
 - Baseline retained as a fallback model in the registry for rollback demos.
 
 ### 4.7 Data sources
@@ -122,4 +122,4 @@ Single-host scope. Scale-out options documented but not implemented:
 - How do we handle ticker symbols that collide with English words (e.g., `IT`, `ON`)?
 - Fast forwarding vs. sliding window for sentiment aggregation?
 
-These are revisited in `docs/tradeoffs.md` (Phase 13).
+

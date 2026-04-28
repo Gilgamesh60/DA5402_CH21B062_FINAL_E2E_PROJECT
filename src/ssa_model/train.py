@@ -1,6 +1,6 @@
-"""Train a sentiment classifier — Phase 4 baseline.
+"""Train a sentiment classifier — baseline.
 
-Loads the Phase 3 feature splits + vectorizer, trains a logistic
+Loads the feature splits + vectorizer, trains a logistic
 regression, logs everything to MLflow, registers the model. Writes
 `artifacts/train_metrics.json` so DVC can track it as a metric.
 """
@@ -63,7 +63,7 @@ class TrainingConfig:
 def _build_classifier(cfg: TrainingConfig) -> LogisticRegression:
     if cfg.model_type != "logistic_regression":
         raise NotImplementedError(
-            f"Phase 4 baseline only supports logistic_regression; got {cfg.model_type}"
+            f"only supports logistic_regression; got {cfg.model_type}"
         )
     return LogisticRegression(
         C=cfg.C,
@@ -123,7 +123,6 @@ def run(
     with mlflow_run(
         run_name=f"{cfg.model_type}-train",
         tags={
-            "phase": "4",
             "model_type": cfg.model_type,
             "model_package_version": model_pkg_version,
             "feature_package_version": featurizer.feature_package_version_,
@@ -187,8 +186,8 @@ def run(
                 mlflow.log_artifact(str(f))
 
         # Bundle the vectorizer alongside the classifier so serving never
-        # has to know about the Phase 3 package internals. The loader
-        # (Phase 5) unpickles this file and has both components.
+        # has to know about the package internals. The loader
+        # () unpickles this file and has both components.
         bundle_path = Path(tempfile.mkdtemp()) / "bundle.joblib"
         import joblib
 

@@ -4,7 +4,7 @@ An end-to-end AI application that predicts sentiment (positive / negative / neut
 
 ## Status
 
-Phase 0 — Scaffolding and contracts. Nothing runs yet.
+Under active development.
 
 ## Problem
 
@@ -42,7 +42,7 @@ See [`docs/architecture.md`](docs/architecture.md) for the full diagram.
 - [Low-Level Design](docs/LLD.md)
 - [Acceptance Criteria](docs/acceptance-criteria.md)
 - [Test Plan](docs/test-plan.md)
-- [User Manual](docs/user-manual.md) — written in Phase 13
+- [User Manual](docs/user-manual.md)
 - [References](docs/references/) — original course guideline PDFs
 
 ## Repository layout

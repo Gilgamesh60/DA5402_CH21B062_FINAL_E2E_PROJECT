@@ -2,7 +2,7 @@
 
 Triggers:
   - Manual (default) from the Airflow UI for demos
-  - Webhook from Alertmanager when drift fires (wired in Phase 9 via
+  - Webhook from Alertmanager when drift fires (wired in via
     Airflow's REST API; see the README for the cURL invocation)
 
 The DAG reuses the DVC-repro'd datasets so it stays aligned with the
@@ -61,7 +61,7 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     catchup=False,
     default_args=DEFAULT_ARGS,
-    tags=["ssa", "phase9", "training"],
+    tags=["ssa", "training"],
     max_active_runs=1,
 ) as dag:
 

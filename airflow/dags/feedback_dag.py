@@ -43,7 +43,7 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     catchup=False,
     default_args=DEFAULT_ARGS,
-    tags=["ssa", "phase9", "monitoring"],
+    tags=["ssa", "monitoring"],
 ) as dag:
 
     aggregate = PythonOperator(

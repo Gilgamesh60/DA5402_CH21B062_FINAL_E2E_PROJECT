@@ -4,8 +4,8 @@ The repo is bind-mounted read-only at /opt/airflow/repo and PYTHONPATH
 points at /opt/airflow/repo/src, so the DAG's PythonOperators can import
 ssa_ingestion directly without a container rebuild.
 
-Schedule is None in Phase 2 (manual trigger only); cron schedule gets
-flipped on in Phase 9 once live data sources are configured.
+Schedule is None in (manual trigger only); cron schedule gets
+flipped on in once live data sources are configured.
 """
 
 from __future__ import annotations
@@ -59,7 +59,7 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     catchup=False,
     default_args=DEFAULT_ARGS,
-    tags=["ssa", "phase2", "data"],
+    tags=["ssa", "data"],
 ) as dag:
 
     ingest = PythonOperator(task_id="ingest", python_callable=_run_ingest)

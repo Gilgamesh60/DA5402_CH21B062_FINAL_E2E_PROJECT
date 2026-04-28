@@ -1,6 +1,6 @@
 """MLflow Model Registry helpers.
 
-Encapsulates promotion and rollback so Phase 5/6/9 can reuse the same
+Encapsulates promotion and rollback so /6/9 can reuse the same
 logic. The evaluate stage decides the transitions; this module just
 performs them deterministically.
 """

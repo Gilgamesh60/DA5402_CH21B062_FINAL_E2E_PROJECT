@@ -77,7 +77,7 @@ def _render(junit: dict, acceptance: dict | None) -> str:
         "",
         f"Generated: **{now}**",
         "",
-        "This report is machine-generated from `artifacts/junit.xml` and "
+        "This report is generated from `artifacts/junit.xml` and "
         "`artifacts/acceptance_report.json`. Regenerate with `make test-report`.",
         "",
         "## Summary",
@@ -146,7 +146,7 @@ def _render(junit: dict, acceptance: dict | None) -> str:
             )
             if actual_val is None and "passed" in c:
                 actual_val = "reached" if c["passed"] else "not reached"
-            status = "✅ PASS" if c["passed"] else "❌ FAIL"
+            status = "PASS" if c["passed"] else "FAIL"
             lines.append(f"| {name} | {target} | {actual_val} | {status} |")
         lines.append("")
         raw = acceptance["raw"]["predict"]

@@ -3,7 +3,7 @@
 Running journal of what landed in each phase and any problems encountered.
 This feeds `docs/problems-faced.md` for the viva.
 
-## Phase 0 — Scaffolding & contracts — ✅ complete
+## Phase 0 — Scaffolding & contracts — [done]
 
 Delivered:
 - Repo skeleton with package split (`ssa_ingestion`, `ssa_features`, `ssa_model`, `ssa_api`, `ssa_monitoring`)
@@ -15,7 +15,7 @@ Delivered:
 
 Problems faced: none yet.
 
-## Phase 1 — Infrastructure skeleton — ✅ complete
+## Phase 1 — Infrastructure skeleton — [done]
 
 Delivered:
 - `docker-compose.yml` with 10 services on a shared network: postgres, mlflow, model-server, api, airflow-init/webserver/scheduler, prometheus, grafana, frontend
@@ -45,7 +45,7 @@ Live boot verification (Colima, aarch64):
 - MLflow, Airflow, Prometheus, Grafana, Frontend all return 200 on their health endpoints ✓
 - Prometheus actively scraping `api` and `prometheus` (model-server and airflow pending their proper exporters)
 - Grafana dashboard `ssa-api-overview` provisioned and queryable
-## Phase 2 — Data ingestion + EDA + baselines — ✅ complete
+## Phase 2 — Data ingestion + EDA + baselines — [done]
 
 Delivered:
 - Unified `TextRecord` Pydantic schema normalising news + social into one shape
@@ -64,7 +64,7 @@ Delivered:
 Problems faced:
 - `dvc repro` initially failed with "command not found: python" because DVC inherits the shell's PATH, and zsh on macOS doesn't alias `python` to `python3`. Fixed by switching the stage commands to `python3` and activating the venv before `dvc repro`.
 - Pandas serialises NaN values from parquet where Python expected `None`; added an explicit NaN→None normalisation step in `validation.run()` before handing rows to Pydantic.
-## Phase 3 — Feature engineering package — ✅ complete
+## Phase 3 — Feature engineering package — [done]
 
 Delivered:
 - `ssa_features` package bumped to `0.2.0` — independent version stamped on every saved vectorizer so mismatches are detectable
@@ -79,7 +79,7 @@ Delivered:
 Problems faced:
 - `train_test_split` throws on tiny classes; added a fallback to non-stratified split when any class has < 2 samples. Not hit by the current seed corpus but future-proofs live runs.
 - Initially put `text_clean` inside the vectorizer so serving could pass raw text, but the persisted splits then didn't carry the cleaned version. Moved cleaning to happen once in `pipeline.run()` and stored `text_clean` as a first-class column in the parquets so Phase 4 training, Phase 6 drift detection, and Phase 11 test fixtures all look at identical inputs.
-## Phase 4 — MLflow + baseline training — ✅ complete
+## Phase 4 — MLflow + baseline training — [done]
 
 Delivered:
 - `ssa_model` package with four modules: `reproducibility`, `metrics`, `tracking`, `train`, `evaluate`, `registry`
@@ -98,7 +98,7 @@ Problems faced:
 - Wiped and recreated the `mlflow` Postgres database after the fix because existing experiments had the bad `artifact_location` baked in.
 - Client (venv) was MLflow 3.11.1 while server was still 2.10.2 — client called endpoints the server didn't have. Pinned the server Dockerfile to `mlflow==3.11.1` to match.
 - MLflow 3.x emits `FutureWarning` for `transition_model_version_stage` in favour of aliases, but the evaluation rubric explicitly expects stage-based promotion. Left the warnings in place; migration to aliases is a Phase-post-grading concern.
-## Phase 5 — FastAPI gateway + real MLflow model server — ✅ complete
+## Phase 5 — FastAPI gateway + real MLflow model server — [done]
 
 Delivered:
 - `src/ssa_api/schemas.py` — Pydantic request/response models matching the LLD contract exactly
@@ -126,7 +126,7 @@ Problems faced:
 - sklearn version mismatch between training (1.8.0 in venv) and serving (1.7.2 initially in model-server image). The unpickled LogisticRegression referenced attributes only in 1.8. Aligned by pinning `scikit-learn==1.8.0` in the model-server image.
 - MLflow pyfunc scoring server passes rows as numpy scalars/arrays, not Python strings. Rewrote `SentimentPipeline._coerce_to_texts` to handle DataFrames, numpy scalars, single-element arrays, and dict-wrapped inputs uniformly.
 - Switched model registration from `mlflow.sklearn.log_model` to a `pyfunc` bundle so the model-server accepts text instead of sparse matrices — cleaner HTTP contract and matches the rubric's "MLflow API-ification" item.
-## Phase 6 — Prometheus + Grafana + alerts + drift — ✅ complete
+## Phase 6 — Prometheus + Grafana + alerts + drift — [done]
 
 Delivered:
 - `ssa_monitoring.drift` — drift detection comparing live features to `artifacts/baselines.json`:
@@ -152,7 +152,7 @@ Live verification:
 Problems faced:
 - KS test against a synthetic-normal reference built from baseline mean+std flags very narrow live distributions (like templated text) as drift. Acceptable for Phase 6; will settle once Phase 10 real data lands.
 - mlflow models serve doesn't expose `/metrics` natively. Rather than add a sidecar exporter for the model server, deferred — API-side metrics plus the `up{job="api"}` signal cover serving availability for grading purposes.
-## Phase 7 — Frontend + pipeline viz screens — ✅ complete
+## Phase 7 — Frontend + pipeline viz screens — [done]
 
 Delivered:
 - React 18 + Vite + TypeScript + Tailwind CSS frontend in `frontend/`
@@ -179,7 +179,7 @@ Live verification:
 Problems faced:
 - Tailwind v3 + Vite + strict TypeScript initially flagged unused param warnings; cleaned up with `noUnusedParameters` compliance throughout.
 - The frontend's browser fetches to MLflow/Prometheus/Grafana are blocked by their CORS policies — resolved by using `mode: "no-cors"` for reachability-only checks on the Health page and direct iframe-free navigation for the full MLOps tool UIs on the Pipelines page. The proper CORS fix is a Phase 12 nicety.
-## Phase 8 — CI/CD + rollback — ✅ complete
+## Phase 8 — CI/CD + rollback — [done]
 
 Delivered:
 - `.github/workflows/ci.yml` — three-job CI on every push + PR:
@@ -195,7 +195,7 @@ Delivered:
 
 Problems faced:
 - No new blockers. All three workflows syntactically valid; rollback flow proven against the live MLflow server.
-## Phase 9 — Feedback loop + retraining — ✅ complete
+## Phase 9 — Feedback loop + retraining — [done]
 
 Delivered:
 - `predictions` Postgres table (+migration) so `/feedback` can join back to the predicted label for real-world accuracy
@@ -219,8 +219,8 @@ Problems faced:
 - Airflow image lazy-imports `email-validator` through Pydantic 2.x networks module when pydantic-settings touches URL types; train task crashed on the first run. Added `email-validator>=2.0` to `_PIP_ADDITIONAL_REQUIREMENTS` and recreated the Airflow containers (pip installs are baked in at boot).
 - Postgres volume persisted from Phase 1 so the `predictions` table didn't exist on existing deployments. Wrote `docker/postgres/migrations/001_phase9_predictions.sql` and applied via `psql` to the running container.
 - Feedback aggregation needs Postgres access via the compose network, not from host (Postgres isn't port-mapped). Airflow + drift-exporter both reach it by service name; local dev runs the aggregator inside the scheduler container.
-## Phase 10 — FinBERT + quantization — ⏳ pending
-## Phase 11 — Tests + report — ✅ complete
+## Phase 10 — FinBERT + quantization — [pending]
+## Phase 11 — Tests + report — [done]
 
 Delivered:
 - 13 contract tests (`tests/contract/`) — every endpoint's live response checked against LLD contract
@@ -243,5 +243,5 @@ Problems faced:
 - Initial p95 measurement hit 1.8 s because `/predict` re-opened a psycopg2 connection on every call and re-hit the MLflow registry per call. Fixed with (a) single lazy psycopg2 connection in `PredictionRepo`, (b) 5-second cache on `_current_production_ref`. p95 dropped 38x to 48ms.
 - Frontend nginx upstream cached the API container's IP pre-recreate and returned 502 on proxied `/api/*` calls. Fix: `docker compose restart frontend` re-resolves. Permanent fix via nginx `resolver` directive deferred to Phase 12.
 - `NEVEREXISTED` (12 chars) trips the ticker length validator instead of "no data"; test switched to `ZZZ` to exercise the intended 404 path.
-## Phase 12 — Security hardening — ⏳ pending
-## Phase 13 — Demo polish + viva prep — ⏳ pending
+## Phase 12 — Security hardening — [pending]
+## Phase 13 — Demo polish + viva prep — [pending]

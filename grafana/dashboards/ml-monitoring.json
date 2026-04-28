@@ -6,7 +6,7 @@
   "id": null,
   "uid": "ssa-ml-monitoring",
   "title": "Stock Sentiment — ML monitoring",
-  "tags": ["ssa", "phase6", "drift"],
+  "tags": ["ssa", "drift"],
   "timezone": "browser",
   "schemaVersion": 39,
   "version": 1,

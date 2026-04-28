@@ -1,4 +1,4 @@
-"""Unit tests for the Phase 5 API — probes and Prometheus exposition."""
+"""Unit tests for the API — probes and Prometheus exposition."""
 
 from __future__ import annotations
 

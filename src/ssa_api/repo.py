@@ -3,8 +3,8 @@
 - FeedbackRepo writes ground-truth labels to Postgres.
 - PredictionRepo writes prediction events so /feedback can join back to
   the predicted label and we can compute real-world accuracy.
-- RecordRepo reads recent text records for a ticker. Phase 5 reads from
-  the validated parquet; Phase 9 (live data) switches to a proper store.
+- RecordRepo reads recent text records for a ticker. reads from
+  the validated parquet; (live data) switches to a proper store.
 """
 
 from __future__ import annotations

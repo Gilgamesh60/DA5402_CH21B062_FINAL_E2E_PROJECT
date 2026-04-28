@@ -5,7 +5,7 @@ In production the model-server runs `mlflow models serve` which exposes
 dataframe-split format. We use the `inputs` form because we send text
 records.
 
-For Phase 5 the model-server loads a pipeline that accepts raw text;
+For the model-server loads a pipeline that accepts raw text;
 see `src/ssa_api/inference.py` for the text→prediction adapter.
 """
 

@@ -3,7 +3,7 @@
 Wraps TF-IDF in a class that:
 - Stamps the feature package version onto every saved artifact,
 - Records vocabulary size + top-terms metadata for the viva,
-- Serialises to a single `.joblib` file Phase 4 training loads.
+- Serialises to a single `.joblib` file training loads.
 
 If the team swaps TF-IDF for embeddings later, only this module changes;
 the train + serve contracts stay intact.
@@ -34,7 +34,7 @@ class VectorizerConfig:
 
 
 class TextFeaturizer:
-    """Clean + vectorize. The only thing Phase 4 training needs.
+    """Clean + vectorize. The only thing training needs.
 
     Attributes populated after `fit`:
         vectorizer_: fitted TfidfVectorizer

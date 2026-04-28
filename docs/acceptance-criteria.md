@@ -40,8 +40,8 @@ The software is considered acceptable when **all** criteria below are met on a c
 | High-level design doc with rationale | ✓ `docs/HLD.md` |
 | Low-level design doc with endpoint I/O | ✓ `docs/LLD.md` |
 | Test plan and test cases | ✓ `docs/test-plan.md` |
-| Test report with pass/fail counts | Filled in Phase 11 |
-| User manual for non-technical users | Filled in Phase 13 |
+| Test report with pass/fail counts | See docs/test-report.md |
+| User manual for non-technical users | See docs/user-manual.md |
 
 ## 5. Demo acceptance
 
@@ -53,4 +53,4 @@ The software is considered acceptable when **all** criteria below are met on a c
 
 ## 6. Sign-off
 
-This document is the pass/fail yardstick for the test report in Phase 11.
+This document is the pass/fail yardstick for the test report.

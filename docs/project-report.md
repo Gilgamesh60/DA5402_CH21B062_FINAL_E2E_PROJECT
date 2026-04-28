@@ -374,10 +374,10 @@ The DVC DAG (`dvc.yaml`) represents the CI pipeline. `dvc repro` validates the f
 
 | Criterion | Target | Actual | Status |
 |---|---|---|---|
-| `/predict` p95 latency | < 200 ms | 48–193 ms | ✅ PASS |
-| API error rate | < 5% | 0.0% | ✅ PASS |
-| `/ready` within timeout | < 30 s | reached | ✅ PASS |
-| Model macro-F1 | ≥ 0.75 | 1.0 | ✅ PASS |
+| `/predict` p95 latency | < 200 ms | 48–193 ms | PASS |
+| API error rate | < 5% | 0.0% | PASS |
+| `/ready` within timeout | < 30 s | reached | PASS |
+| Model macro-F1 | ≥ 0.75 | 1.0 | PASS |
 
 Full test report with per-file breakdown: `docs/test-report.md`
 

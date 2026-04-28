@@ -294,4 +294,4 @@ Every endpoint returns an `ErrorResponse` on non-2xx. Error codes are a closed e
 
 ## 14. Versioning
 
-The API itself versions via URL prefix starting at Phase 5: the routes above all live under `/v1`. The `X-API-Version` response header carries the build version.
+The API versions via URL prefix: the routes above all live under `/v1`. The `X-API-Version` response header carries the build version.

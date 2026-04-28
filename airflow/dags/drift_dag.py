@@ -37,7 +37,7 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     catchup=False,
     default_args=DEFAULT_ARGS,
-    tags=["ssa", "phase6", "monitoring"],
+    tags=["ssa", "monitoring"],
 ) as dag:
 
     drift = PythonOperator(task_id="detect_drift", python_callable=_run_drift)

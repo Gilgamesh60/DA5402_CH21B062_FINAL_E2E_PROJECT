@@ -58,7 +58,7 @@ services:
       - ssa-net
 
   # -----------------------------------------------------------------
-  # Model server: mlflow models serve (stub in Phase 1)
+  # Model server: mlflow models serve
   # -----------------------------------------------------------------
   model-server:
     build:
@@ -81,7 +81,7 @@ services:
       - ssa-net
 
   # -----------------------------------------------------------------
-  # FastAPI gateway (stub in Phase 1 — real impl lands in Phase 5)
+  # FastAPI gateway
   # -----------------------------------------------------------------
   api:
     build:
@@ -310,7 +310,7 @@ services:
       - ssa-net
 
   # -----------------------------------------------------------------
-  # Frontend: stub nginx page in Phase 1, React app in Phase 7
+  # Frontend: React app served by nginx
   # -----------------------------------------------------------------
   frontend:
     build:

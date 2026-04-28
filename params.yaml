@@ -44,7 +44,7 @@ features:
     sublinear_tf: true
 
 training:
-  model_type: logistic_regression  # baseline; swap to finbert in Phase 10
+  model_type: logistic_regression  # baseline model
   test_size: 0.2
   val_size: 0.1
   random_seed: 42
